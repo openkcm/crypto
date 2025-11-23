@@ -1,6 +1,6 @@
 package tenantmanager
 
-import "github.com/openkcm/crypto-edge/internal/config"
+import "github.com/openkcm/crypto/internal/config"
 
 type Server struct {
 }

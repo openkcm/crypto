@@ -14,8 +14,8 @@ import (
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto-edge/cmd/crypto-edge/encrypto"
-	"github.com/openkcm/crypto-edge/cmd/crypto-edge/migrate"
+	"github.com/openkcm/crypto/cmd/crypto/encrypto"
+	"github.com/openkcm/crypto/cmd/crypto/migrate"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Crypto Edge Version",
+	Short: "Crypto Version",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		isVersionCmd = true
 
@@ -46,9 +46,9 @@ var versionCmd = &cobra.Command{
 
 func rootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cryptoedge",
-		Short: "Crypto Edge",
-		Long: "Crypto Edge is a key management service to manage " +
+		Use:   "crypto",
+		Short: "Crypto",
+		Long: "Crypto is a key management service to manage " +
 			"encryption keys for applications and services.",
 	}
 

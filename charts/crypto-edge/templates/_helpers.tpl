@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "crypto-edge.name" -}}
+{{- define "crypto.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "crypto-edge.fullname" -}}
+{{- define "crypto.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -31,23 +31,23 @@ By default this is not set so the helm release namespace will be used
 This gets around an problem within helm discussed here
 https://github.com/helm/helm/issues/5358
 */}}
-{{- define "crypto-edge.namespace" -}}
+{{- define "crypto.namespace" -}}
     {{ .Values.namespace | default .Release.Namespace }}
 {{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "crypto-edge.chart" -}}
+{{- define "crypto.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "crypto-edge.labels" -}}
-helm.sh/chart: {{ include "crypto-edge.chart" . }}
-{{ include "crypto-edge.selectorLabels" . }}
+{{- define "crypto.labels" -}}
+helm.sh/chart: {{ include "crypto.chart" . }}
+{{ include "crypto.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -57,25 +57,25 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Encrypto Selector labels
 */}}
-{{- define "crypto-edge.encrypto.labels" -}}
-{{ include "crypto-edge.labels" . }}
-{{ include "crypto-edge.name" . }}.openkcm.io/component: encrypto
+{{- define "crypto.encrypto.labels" -}}
+{{ include "crypto.labels" . }}
+{{ include "crypto.name" . }}.openkcm.io/component: encrypto
 {{- end }}
 
 {{/*
 Tenant Manager Selector labels
 */}}
-{{- define "crypto-edge.tenant-manager.labels" -}}
-{{ include "crypto-edge.labels" . }}
-{{ include "crypto-edge.name" . }}.openkcm.io/component: tenant-manager
+{{- define "crypto.tenant-manager.labels" -}}
+{{ include "crypto.labels" . }}
+{{ include "crypto.name" . }}.openkcm.io/component: tenant-manager
 {{- end }}
 
 
 {{/*
 Common Selector labels
 */}}
-{{- define "crypto-edge.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "crypto-edge.name" . }}
+{{- define "crypto.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "crypto.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: {{ .Chart.Name }}
 {{- end }}
@@ -83,25 +83,25 @@ app.kubernetes.io/component: {{ .Chart.Name }}
 {{/*
 Encrypto Selector labels
 */}}
-{{- define "crypto-edge.encrypto.selectorLabels" -}}
-{{ include "crypto-edge.selectorLabels" . }}
-{{ include "crypto-edge.name" . }}.openkcm.io/component: encrypto
+{{- define "crypto.encrypto.selectorLabels" -}}
+{{ include "crypto.selectorLabels" . }}
+{{ include "crypto.name" . }}.openkcm.io/component: encrypto
 {{- end }}
 
 {{/*
 Tenant Manager Selector labels
 */}}
-{{- define "crypto-edge.tenant-manager.selectorLabels" -}}
-{{ include "crypto-edge.selectorLabels" . }}
-{{ include "crypto-edge.name" . }}.openkcm.io/component: tenant-manager
+{{- define "crypto.tenant-manager.selectorLabels" -}}
+{{ include "crypto.selectorLabels" . }}
+{{ include "crypto.name" . }}.openkcm.io/component: tenant-manager
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "crypto-edge.serviceAccountName" -}}
+{{- define "crypto.serviceAccountName" -}}
 {{- if .Values.common.serviceAccount.create }}
-{{- default (include "crypto-edge.fullname" .) .Values.common.serviceAccount.name }}
+{{- default (include "crypto.fullname" .) .Values.common.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.common.serviceAccount.name }}
 {{- end }}
@@ -110,7 +110,7 @@ Create the name of the service account to use
 {{/*
 Util function for generating the image URL based on the provided options.
 */}}
-{{- define "crypto-edge.image" -}}
+{{- define "crypto.image" -}}
 {{- $defaultTag := index . 1 -}}
 {{- with index . 0 -}}
 {{- if .registry -}}{{ printf "%s/%s" .registry .repository }}{{- else -}}{{- .repository -}}{{- end -}}

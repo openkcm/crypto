@@ -15,9 +15,9 @@ import (
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto-edge/cmd/crypto-edge/common"
-	"github.com/openkcm/crypto-edge/internal/config"
-	"github.com/openkcm/crypto-edge/internal/encrypto"
+	"github.com/openkcm/crypto/cmd/crypto/common"
+	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/encrypto"
 )
 
 const (
@@ -102,8 +102,8 @@ func startStatusServer(ctx context.Context, cfg *config.Config) {
 func Cmd(buildInfo string) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "encrypto",
-		Short: "Crypto Edge Encrypto",
-		Long:  "Crypto Edge Encrypto is a component of manging the crypto keys",
+		Short: "Crypto Encrypto",
+		Long:  "Crypto Encrypto is a component of manging the crypto keys",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := common.LoadConfig(buildInfo)
 			if err != nil {

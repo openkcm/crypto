@@ -1,6 +1,6 @@
 apiVersion: v2
-name: crypto-edge
-description: Crypto Edge Helm Chart
+name: crypto
+description: Crypto Helm Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

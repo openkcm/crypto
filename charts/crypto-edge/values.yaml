@@ -1,4 +1,4 @@
-# Default values for crypto edge.
+# Default values for crypto.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -24,13 +24,13 @@ common:
     # The container registry to pull the image from.
     # For example:
     #   registry: ghcr.io/openkcm
-    #   repository: images/crypto-edge
+    #   repository: images/crypto
     # +docs:property
     registry: ghcr.io/openkcm
 
     # The container image
     # +docs:property
-    repository: images/crypto-edge
+    repository: images/crypto
 
     # Override the image tag to deploy by setting this variable.
     # If no value is set, the chart's appVersion is used.
@@ -43,7 +43,7 @@ common:
 
     # Setting the command.
     # +docs:property
-    command: [ "/bin/crypto-edge" ]
+    command: [ "/bin/crypto" ]
 
     # Kubernetes imagePullPolicy.
     pullPolicy: IfNotPresent

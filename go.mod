@@ -1,4 +1,4 @@
-module github.com/openkcm/crypto-edge
+module github.com/openkcm/crypto
 
 go 1.25.1
 

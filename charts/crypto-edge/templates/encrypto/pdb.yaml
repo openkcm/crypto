@@ -2,14 +2,14 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "crypto-edge.fullname" . }}-encrypto
-  namespace: {{ include "crypto-edge.namespace" . }}
+  name: {{ include "crypto.fullname" . }}-encrypto
+  namespace: {{ include "crypto.namespace" . }}
   labels:
-    {{- include "crypto-edge.encrypto.labels" . | nindent 4 }}
+    {{- include "crypto.encrypto.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "crypto-edge.encrypto.selectorLabels" . | nindent 6 }}
+      {{- include "crypto.encrypto.selectorLabels" . | nindent 6 }}
   {{- if not (or (hasKey .Values.encrypto.pod.disruptionBudget "minAvailable") (hasKey .Values.encrypto.pod.disruptionBudget "maxUnavailable")) }}
   minAvailable: 1 # Default value because minAvailable and maxUnavailable are not set
   {{- end }}

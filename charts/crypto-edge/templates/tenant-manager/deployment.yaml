@@ -12,17 +12,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "crypto-edge.fullname" . }}-tenant-manager
-  namespace: {{ include "crypto-edge.namespace" . }}
+  name: {{ include "crypto.fullname" . }}-tenant-manager
+  namespace: {{ include "crypto.namespace" . }}
   labels:
-    {{- include "crypto-edge.tenant-manager.labels" . | nindent 4 }}
+    {{- include "crypto.tenant-manager.labels" . | nindent 4 }}
 spec:
   {{- if .Values.tenantManager.hpa.enabled }}
   replicas: {{ .Values.tenantManager.hpa.minReplicas }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "crypto-edge.tenant-manager.selectorLabels" . | nindent 6 }}
+      {{- include "crypto.tenant-manager.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.tenantManager.pod.annotations }}
@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "crypto-edge.tenant-manager.labels" . | nindent 8 }}
+        {{- include "crypto.tenant-manager.labels" . | nindent 8 }}
         {{- with .Values.tenantManager.pod.labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -39,7 +39,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "crypto-edge.serviceAccountName" . }}
+      serviceAccountName: {{ include "crypto.serviceAccountName" . }}
       {{- with .Values.tenantManager.pod.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -51,12 +51,12 @@ spec:
         {{- with .Values.tenantManager.extraContainers }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        - name: {{ include "crypto-edge.name" . }}
+        - name: {{ include "crypto.name" . }}
           {{- with .Values.common.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ template "crypto-edge.image" (tuple .Values.common.image $.Chart.AppVersion) }}"
+          image: "{{ template "crypto.image" (tuple .Values.common.image $.Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.common.image.pullPolicy }}
           {{- with .Values.common.image.command }}
           command:
@@ -104,7 +104,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: {{ include "crypto-edge.name" . }}-config-volume
+            - name: {{ include "crypto.name" . }}-config-volume
               mountPath: /etc/tenant-manager
               readOnly: true
           {{- with .Values.tenantManager.extraVolumeMounts }}
@@ -114,9 +114,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
-        - name: {{ include "crypto-edge.name" . }}-config-volume
+        - name: {{ include "crypto.name" . }}-config-volume
           configMap:
-            name: {{ include "crypto-edge.name" . }}-tenant-manager-config
+            name: {{ include "crypto.name" . }}-tenant-manager-config
       {{- with .Values.tenantManager.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

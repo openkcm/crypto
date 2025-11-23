@@ -20,8 +20,8 @@ import (
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto-edge/internal/config"
-	"github.com/openkcm/crypto-edge/internal/tenantmanager"
+	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/tenantmanager"
 )
 
 const (
@@ -57,8 +57,8 @@ var versionCmd = &cobra.Command{
 func rootCmd() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "tenant-manager",
-		Short: "Crypto Edge Tenant Manager",
-		Long:  `Crypto Edge Tenant Manager - a service to manage tenants.`,
+		Short: "Crypto Tenant Manager",
+		Long:  `Crypto Tenant Manager - a service to manage tenants.`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
 
