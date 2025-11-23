@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/openkcm/common-sdk v1.4.7
-	github.com/samber/oops v1.19.3
+	github.com/samber/oops v1.19.4
 	github.com/spf13/cobra v1.10.1
 	github.com/veqryn/slog-context v0.8.0
 )
@@ -33,7 +33,7 @@ require (
 	github.com/prometheus/otlptranslator v0.0.2 // indirect
 	github.com/prometheus/procfs v0.17.0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
-	github.com/samber/lo v1.51.0 // indirect
+	github.com/samber/lo v1.52.0 // indirect
 	github.com/samber/slog-common v0.19.0 // indirect
 	github.com/samber/slog-formatter v1.2.0 // indirect
 	github.com/samber/slog-multi v1.5.0 // indirect
