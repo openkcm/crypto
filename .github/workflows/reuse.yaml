@@ -1,0 +1,19 @@
+name: Compliance
+
+on:
+  push:
+    paths-ignore:
+      - 'charts/**'
+      - 'docs/**'
+      - 'LICENSES/**'
+      - '.releases/**'
+      - '.github/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: openkcm/build/.github/workflows/reuse.svc.yaml@main
+    secrets: inherit

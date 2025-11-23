@@ -1,0 +1,18 @@
+name: Helm
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'charts/**'
+
+permissions:
+  packages: write
+
+env:
+  OCI_URL: ghcr.io/openkcm
+
+jobs:
+  release:
+    uses: openkcm/build/.github/workflows/chart-release.svc.yaml@main
+    secrets: inherit

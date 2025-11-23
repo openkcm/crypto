@@ -1,0 +1,24 @@
+name: Quality
+
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+    paths-ignore:
+      - 'charts/**'
+      - 'docs/**'
+      - 'LICENSES/**'
+      - '.releases/**'
+      - '.github/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: openkcm/build/.github/workflows/ci.svc.yaml@main
+    secrets: inherit
+

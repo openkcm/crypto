@@ -1,0 +1,23 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to publish'
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  OCI_URL: ghcr.io/openkcm
+
+jobs:
+  released:
+    uses: openkcm/build/.github/workflows/publish.svc.yaml@main
+    secrets: inherit

@@ -1,0 +1,113 @@
+version: "2"
+
+run:
+  concurrency: 4
+  timeout: 10m
+
+linters:
+  default: all
+  disable:
+    - nilerr
+    - tagliatelle
+    - bodyclose
+    - gomoddirectives
+    - contextcheck
+    - cyclop
+    - depguard
+    - dupl
+    - err113
+    - exhaustive
+    - exhaustruct
+    - forbidigo
+    - funlen
+    - ginkgolinter
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - gocritic
+    - godot
+    - godox
+    - gosec
+    - ireturn
+    - lll
+    - mnd
+    - musttag
+    - nestif
+    - nlreturn
+    - revive
+    - tagalign
+    - testpackage
+    - unparam
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
+    - funcorder
+    - nonamedreturns
+    - noinlineerr
+  settings:
+    errcheck:
+      exclude-functions:
+        - (github.com/jackc/pgx/v5.Tx).Rollback
+    paralleltest:
+      ignore-missing: true
+      ignore-missing-subtests: true
+    tagliatelle:
+      case:
+        rules:
+          json: camel
+        use-field-name: true
+    testifylint:
+      disable:
+        - require-error
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - funlen
+          - maintidx
+        source: ^func Test
+      - linters:
+          - dupl
+          - funlen
+          - gocognit
+          - goconst
+          - maintidx
+        path: (.+)_test\.go
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/openkcm/crypto-edge)
+        - blank
+        - dot
+        - alias
+        - localmodule
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$
+
+issues:
+  exclude-files:
+    - "tmp/.*"

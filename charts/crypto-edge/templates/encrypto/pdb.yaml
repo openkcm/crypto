@@ -1,0 +1,25 @@
+{{- if .Values.encrypto.pod.disruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "crypto-edge.fullname" . }}-encrypto
+  namespace: {{ include "crypto-edge.namespace" . }}
+  labels:
+    {{- include "crypto-edge.encrypto.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "crypto-edge.encrypto.selectorLabels" . | nindent 6 }}
+  {{- if not (or (hasKey .Values.encrypto.pod.disruptionBudget "minAvailable") (hasKey .Values.encrypto.pod.disruptionBudget "maxUnavailable")) }}
+  minAvailable: 1 # Default value because minAvailable and maxUnavailable are not set
+  {{- end }}
+  {{- if (and (hasKey .Values.encrypto.pod.disruptionBudget "minAvailable") (hasKey .Values.encrypto.pod.disruptionBudget "maxUnavailable")) }}
+  {{- fail "You can only set one of minAvailable or maxUnavailable in the PodDisruptionBudget" }}
+  {{- end }}
+  {{- if hasKey .Values.encrypto.pod.disruptionBudget "minAvailable" }}
+  minAvailable: {{ .Values.encrypto.pod.disruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if hasKey .Values.encrypto.pod.disruptionBudget "maxUnavailable" }}
+  maxUnavailable: {{ .Values.encrypto.pod.disruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}

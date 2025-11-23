@@ -1,0 +1,14 @@
+name: Release New Version
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: openkcm/build/.github/workflows/release.svc.yaml@main
+    secrets: inherit
