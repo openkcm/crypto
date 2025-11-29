@@ -1,26 +1,20 @@
-package common
+package config
 
 import (
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
 	"github.com/samber/oops"
-
-	"github.com/openkcm/crypto/internal/config"
 )
 
 //nolint:mnd
 var defaultConfig = map[string]any{}
 
-func LoadConfig(buildInfo string) (*config.Config, error) {
-	cfg := &config.Config{}
+func LoadConfig(buildInfo string, paths ...string) (*Config, error) {
+	cfg := &Config{}
 
 	loader := commoncfg.NewLoader(
 		cfg,
 		commoncfg.WithDefaults(defaultConfig),
-		commoncfg.WithPaths(
-			"/etc/encrypto",
-			"$HOME/.encrypto",
-			".",
-		),
+		commoncfg.WithPaths(paths...),
 	)
 
 	err := loader.LoadConfig()
