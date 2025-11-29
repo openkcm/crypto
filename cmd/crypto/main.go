@@ -5,98 +5,88 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
-	"github.com/openkcm/common-sdk/pkg/utils"
+	"github.com/openkcm/common-sdk/pkg/logger"
+	"github.com/openkcm/common-sdk/pkg/otlp"
 	"github.com/spf13/cobra"
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/cmd/crypto/encrypto"
-	"github.com/openkcm/crypto/cmd/crypto/migrate"
+	"github.com/openkcm/crypto/cmd"
+	"github.com/openkcm/crypto/internal/config"
+	dbmigrate "github.com/openkcm/crypto/internal/modules/db-migrate"
+	kmiptcp "github.com/openkcm/crypto/internal/modules/kmip-tcp"
+	"github.com/openkcm/crypto/pkg/cmds"
+	"github.com/openkcm/crypto/pkg/module"
 )
 
 var (
 	// BuildInfo will be set by the build system
 	BuildInfo = "{}"
-
-	isVersionCmd            bool
-	gracefulShutdownSec     int64
-	gracefulShutdownMessage string
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Crypto Version",
-	RunE: func(cmd *cobra.Command, _ []string) error {
-		isVersionCmd = true
-
-		value, err := utils.ExtractFromComplexValue(BuildInfo)
-		if err != nil {
-			return err
-		}
-
-		slog.InfoContext(cmd.Context(), value)
-
-		return nil
-	},
-}
-
-func rootCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "crypto",
-		Short: "Crypto",
-		Long: "Crypto is a key management service to manage " +
-			"encryption keys for applications and services.",
+var (
+	serveModules = []module.EmbeddedModule{
+		kmiptcp.New(),
+	}
+	migrateModules = []module.EmbeddedModule{
+		dbmigrate.New(),
 	}
 
-	cmd.PersistentFlags().Int64Var(&gracefulShutdownSec, "graceful-shutdown",
-		1,
-		"graceful shutdown seconds",
-	)
-	cmd.PersistentFlags().StringVar(&gracefulShutdownMessage, "graceful-shutdown-message",
-		"Graceful shutdown in %d seconds",
-		"graceful shutdown message",
-	)
-
-	cmd.AddCommand(
-		versionCmd,
-		encrypto.Cmd(BuildInfo),
-		migrate.Cmd(BuildInfo),
-	)
-
-	return cmd
-}
-
-func execute() error {
-	ctx, cancelOnSignal := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt, syscall.SIGTERM,
-	)
-	defer cancelOnSignal()
-
-	err := rootCmd().ExecuteContext(ctx)
-	if err != nil {
-		slogctx.Error(ctx, "Failed to start the application", "error", err)
-		_, _ = fmt.Fprintln(os.Stderr, err)
-
-		return err
+	serve = &cobra.Command{
+		Use:   "run",
+		Short: "Start all enabled Crypto service modules and run the server.",
+		Args:  cobra.NoArgs,
+		RunE:  cmds.RunServeWithGracefulShutdown(serveModules),
 	}
-
-	// graceful shutdown so running goroutines may finish
-	if !isVersionCmd {
-		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf(gracefulShutdownMessage, gracefulShutdownSec))
-		time.Sleep(time.Duration(gracefulShutdownSec) * time.Second)
+	migrate = &cobra.Command{
+		Use:   "dbmigrate",
+		Short: "Run database schema migrations required by the Crypto service.",
+		Args:  cobra.NoArgs,
+		RunE:  cmds.RunServeWithGracefulShutdown(migrateModules),
 	}
-
-	return nil
-}
+)
 
 func main() {
-	err := execute()
+	ctx := context.Background()
+
+	cfg, err := config.LoadConfig(BuildInfo,
+		"/etc/crypto",
+		"$HOME/.crypto",
+		".",
+	)
 	if err != nil {
+		slogctx.Error(ctx, "Failed to load config", "error", err)
 		os.Exit(1)
+	}
+
+	// LoggerConfig initialisation
+	err = logger.InitAsDefault(cfg.Logger, cfg.Application)
+	if err != nil {
+		slogctx.Error(ctx, "Failed to init the logger", "error", err)
+		os.Exit(1)
+	}
+
+	// OpenTelemetry initialisation
+	err = otlp.Init(ctx, &cfg.Application, &cfg.Telemetry, &cfg.Logger)
+	if err != nil {
+		slogctx.Error(ctx, "Failed to init the logger", "error", err)
+		os.Exit(1)
+	}
+
+	cmd.RootCmd.Version = cfg.Application.BuildInfo.Version
+	err = cmds.SetupRootCommand(cmd.RootCmd, cfg, map[*cobra.Command][]module.EmbeddedModule{
+		serve:   serveModules,
+		migrate: migrateModules,
+	})
+	if err != nil {
+		slogctx.Error(ctx, "Failed to setup root command", "error", err)
+		os.Exit(1)
+	}
+
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	if err != nil {
+		slog.Error("Failed to start the application", "error", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 	}
 }

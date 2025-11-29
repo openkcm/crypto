@@ -1,0 +1,8 @@
+application:
+  name: crypto
+  environment: development
+
+status:
+  enabled: true
+  address: ":8888"
+  profiling: true
