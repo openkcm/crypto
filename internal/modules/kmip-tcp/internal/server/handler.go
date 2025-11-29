@@ -13,12 +13,13 @@ var KMIPMessagesHandler = func(config *config.Config) kmip.Handler {
 
 	// the handler should be stateless
 	return func(ctx context.Context, data []byte) ([]byte, error) {
-		m := map[string]interface{}{}
+		m := map[string]any{}
 		err := processor.Decode(data, &m)
 		if err != nil {
 			return nil, err
 		}
 
+		//nolint: forcetypeassert
 		buf := defaultPool.Get().(*bytes.Buffer)
 		defer func() {
 			buf.Reset()

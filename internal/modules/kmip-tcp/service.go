@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/openkcm/crypto/internal/kmip"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/kmip"
 	"github.com/openkcm/crypto/internal/modules"
 	"github.com/openkcm/crypto/internal/modules/kmip-tcp/internal/server"
 	"github.com/openkcm/crypto/pkg/concurrent"
@@ -39,6 +39,7 @@ func (s *kmipTCPModule) Name() string { return moduleName }
 
 // Init implements main.embeddedService interface.
 func (s *kmipTCPModule) Init(cfg any, cmd, serveCmd *cobra.Command) error {
+	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
 	s.handler = server.KMIPMessagesHandler(s.config)
 

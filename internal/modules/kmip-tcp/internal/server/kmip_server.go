@@ -9,12 +9,14 @@ import (
 	"io"
 	"net"
 	"sync"
+	"syscall"
 	"time"
+
+	slogctx "github.com/veqryn/slog-context"
 
 	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/internal/kmip"
 	"github.com/openkcm/crypto/pkg/module/serve"
-	slogctx "github.com/veqryn/slog-context"
 )
 
 var (
@@ -71,6 +73,7 @@ func (s *KMIPServer) handleByReadAndWriteFromToConnection(
 ) {
 	defer conn.Close()
 
+	//nolint: forcetypeassert
 	buf := s.bufferPool.Get().(*bytes.Buffer)
 	defer func() {
 		buf.Reset()
@@ -87,7 +90,7 @@ func (s *KMIPServer) handleByReadAndWriteFromToConnection(
 		}
 
 		if len(msg) > 0 {
-			customCtx := context.WithValue(ctx, "remote-address", conn.RemoteAddr().String())
+			customCtx := context.WithValue(ctx, RemoteAddrKey, conn.RemoteAddr().String())
 			resp, hErr := s.handler(customCtx, msg)
 			if hErr != nil {
 				slogctx.Error(ctx, "failure on handling the request", "error", hErr)
@@ -101,7 +104,6 @@ func (s *KMIPServer) handleByReadAndWriteFromToConnection(
 				}
 			}
 		}
-
 	}
 }
 
@@ -146,7 +148,7 @@ func readFramedMessage(ctx context.Context, conn net.Conn, buf *bytes.Buffer) ([
 
 		if err != nil {
 			if errors.Is(err, io.EOF) && buf.Len() > 0 {
-				return nil, fmt.Errorf("incomplete KMIP message on connection close")
+				return nil, errors.New("incomplete KMIP message on connection close")
 			}
 			return nil, err
 		}
@@ -210,5 +212,17 @@ func writeWithRetry(ctx context.Context, conn net.Conn, data []byte, maxRetries 
 // isTemporaryNetErr checks if an error is a temporary network error.
 func isTemporaryNetErr(err error) bool {
 	var ne net.Error
-	return errors.As(err, &ne) && (ne.Timeout() || ne.Temporary())
+	if errors.As(err, &ne) && ne.Timeout() {
+		return true
+	}
+
+	oe := &net.OpError{}
+	if errors.As(err, &oe) {
+		var se syscall.Errno
+		if errors.As(oe.Err, &se) {
+			return se == syscall.EAGAIN || se == syscall.EWOULDBLOCK
+		}
+	}
+
+	return false
 }

@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/samber/oops"
+
 	slogctx "github.com/veqryn/slog-context"
 )
 
