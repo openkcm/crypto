@@ -2,12 +2,14 @@ package kmiptcp
 
 import (
 	"context"
+	"errors"
 
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/kmip"
 	"github.com/openkcm/crypto/internal/modules"
 	"github.com/openkcm/crypto/internal/modules/kmip-tcp/internal/server"
 	"github.com/openkcm/crypto/pkg/concurrent"
@@ -21,7 +23,9 @@ const (
 // EmbeddedModule implements main.embeddedService interface.
 type kmipTCPModule struct {
 	config *config.Config
-	fs     *pflag.FlagSet
+
+	handler kmip.Handler
+	fs      *pflag.FlagSet
 }
 
 var _ module.EmbeddedModule = (*kmipTCPModule)(nil)
@@ -37,9 +41,10 @@ func (s *kmipTCPModule) Name() string { return moduleName }
 func (s *kmipTCPModule) Init(cfg any, cmd, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
+	s.handler = server.KMIPMessagesHandler(s.config)
 
 	s.fs = serveCmd.Flags()
-	return nil
+	return s.validate()
 }
 
 // RunServe implements main.embeddedService interface.
@@ -65,7 +70,7 @@ func (s *kmipTCPModule) serveMetrics(_ context.Context) error {
 }
 
 func (s *kmipTCPModule) serveKMIPTCPServer(ctx context.Context) error {
-	kmipServer := server.NewKMIPServer(s.config)
+	kmipServer := server.NewKMIPServer(s.config, s.handler)
 
 	//Start Server Here
 	err := kmipServer.Start(ctx)
@@ -79,4 +84,16 @@ func (s *kmipTCPModule) serveKMIPTCPServer(ctx context.Context) error {
 
 func (s *kmipTCPModule) serveStatusServer(ctx context.Context) error {
 	return modules.ServeStatus(ctx, &s.config.BaseConfig)
+}
+
+func (s *kmipTCPModule) validate() error {
+	if s.config == nil {
+		return errors.New("missing configuration")
+	}
+
+	if s.handler == nil {
+		return errors.New("missing handler")
+	}
+
+	return nil
 }
