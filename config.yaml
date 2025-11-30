@@ -6,3 +6,6 @@ status:
   enabled: true
   address: ":8888"
   profiling: true
+
+kmip:
+  address: ":5696"

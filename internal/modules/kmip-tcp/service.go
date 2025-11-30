@@ -2,16 +2,20 @@ package kmiptcp
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"net"
 
+	"github.com/openkcm/common-sdk/pkg/commoncfg"
+	"github.com/openkcm/crypto/internal/actions"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	slogctx "github.com/veqryn/slog-context"
 
 	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/internal/kmip"
 	"github.com/openkcm/crypto/internal/modules"
-	"github.com/openkcm/crypto/internal/modules/kmip-tcp/internal/server"
+	"github.com/openkcm/crypto/kmip/kmipserver"
 	"github.com/openkcm/crypto/pkg/concurrent"
 	"github.com/openkcm/crypto/pkg/module"
 )
@@ -24,8 +28,8 @@ const (
 type kmipTCPModule struct {
 	config *config.Config
 
-	handler kmip.Handler
-	fs      *pflag.FlagSet
+	kmipActionRegistry actions.Registry
+	fs                 *pflag.FlagSet
 }
 
 var _ module.EmbeddedModule = (*kmipTCPModule)(nil)
@@ -41,7 +45,7 @@ func (s *kmipTCPModule) Name() string { return moduleName }
 func (s *kmipTCPModule) Init(cfg any, cmd, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
-	s.handler = server.KMIPMessagesHandler(s.config)
+	s.kmipActionRegistry = actions.NewRegistry()
 
 	s.fs = serveCmd.Flags()
 	return s.validate()
@@ -70,14 +74,58 @@ func (s *kmipTCPModule) serveMetrics(_ context.Context) error {
 }
 
 func (s *kmipTCPModule) serveKMIPTCPServer(ctx context.Context) error {
-	kmipServer := server.NewKMIPServer(s.config, s.handler)
+	address := s.config.KMIPServer.Address
+	tlsConfig, _ := commoncfg.LoadMTLSConfig(s.config.KMIPServer.TLS)
 
-	//Start Server Here
-	err := kmipServer.Start(ctx)
-	if err != nil {
-		return oops.In(moduleName).
-			Wrapf(err, "Failed to start the KMIP Server")
+	var ln net.Listener
+	var err error
+	if tlsConfig == nil {
+		var lc net.ListenConfig
+		ln, err = lc.Listen(ctx, "tcp", address)
+	} else {
+		ln, err = tls.Listen("tcp", address, tlsConfig)
 	}
+	if err != nil {
+		return oops.Wrapf(err, "failed to listen on %s", address)
+	}
+
+	// Create and start server
+	opts := []kmipserver.Option{
+		kmipserver.WithListener(ln),
+		kmipserver.WithHandler(NewHandler(s.kmipActionRegistry)),
+	}
+	srv, err := kmipserver.NewServer(ctx, opts...)
+	if err != nil {
+		return oops.Wrapf(err, "failed to start kmip TCP server")
+	}
+
+	slogctx.Info(ctx, "Starting KMIP server on "+address+"  ....")
+	go func() {
+		err := srv.Serve()
+		if err != nil && !errors.Is(err, kmipserver.ErrShutdown) {
+			slogctx.Error(ctx, "KMIP server failed to serve", "error", err)
+		}
+	}()
+
+	slogctx.Info(ctx, "KMIP server started")
+
+	<-ctx.Done()
+
+	slogctx.Info(ctx, "KMIP server shutdown")
+	err = srv.Shutdown()
+	if err != nil {
+		return oops.Wrapf(err, "failed to shutdown KMIP server")
+	}
+
+	//
+	//kmipServer := server.NewKMIPServer(s.config)
+	//
+	////Start Server Here
+	//err := kmipServer.Start(ctx)
+	//if err != nil {
+	//	return oops.In(moduleName).
+	//		Wrapf(err, "Failed to start the KMIP Server")
+	//}
 
 	return nil
 }
@@ -89,10 +137,6 @@ func (s *kmipTCPModule) serveStatusServer(ctx context.Context) error {
 func (s *kmipTCPModule) validate() error {
 	if s.config == nil {
 		return errors.New("missing configuration")
-	}
-
-	if s.handler == nil {
-		return errors.New("missing handler")
 	}
 
 	return nil
