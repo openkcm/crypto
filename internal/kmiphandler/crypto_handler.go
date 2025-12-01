@@ -47,7 +47,7 @@ func (h *CryptoHandler) HandleRequest(ctx context.Context, req *kmip.RequestMess
 		}
 		respItem.ResponsePayload = result
 
-		responseItems = append(responseItems)
+		responseItems = append(responseItems, respItem)
 	}
 	// Process KMIP request and return response
 	// Implement your key management logic here
