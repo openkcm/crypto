@@ -34,7 +34,7 @@ func (h *CryptoEdgeHandler) HandleRequest(ctx context.Context, req *kmip.Request
 		if action == nil {
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonOperationNotSupported
-			responseItems = append(responseItems)
+			responseItems = append(responseItems, respItem)
 			continue
 		}
 		result, err := action.Execute(ctx)
@@ -42,7 +42,7 @@ func (h *CryptoEdgeHandler) HandleRequest(ctx context.Context, req *kmip.Request
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonIllegalOperation
 			respItem.ResultMessage = err.Error()
-			responseItems = append(responseItems)
+			responseItems = append(responseItems, respItem)
 			continue
 		}
 		respItem.ResponsePayload = result

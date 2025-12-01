@@ -73,7 +73,7 @@ func (s *TtlvEncodingSuite) TestEncodeBigInteger() {
 		b := big.NewInt(0)
 		b.SetString("-1234567890000000000000000000", 10)
 		s.enc.BigInteger(0x420020, b)
-		expected := expectedHex("42 00 20 | 04 | 00 10 | FF FC 02 CA 14 94 3D 20 B9 E7 F8 00")
+		expected := expectedHex("42 00 20 | 04 | 00 00 00 10 | FF FF FF FF FC 02 CA 14 94 3D 20 B9 E7 F8 00 00")
 		s.Equal(expected, strings.ToUpper(hex.EncodeToString(s.enc.Bytes())))
 	})
 }
@@ -175,7 +175,7 @@ func (s *TtlvDecodingSuite) TestDecodeBigInteger() {
 		b := big.NewInt(0)
 		b.SetString("-1234567890000000000000000000", 10)
 
-		dec := decodeHex("42 00 20 | 04 | 00 10 | FF FC 02 CA 14 94 3D 20 B9 E7 F8 00")
+		dec := decodeHex("42 00 20 | 04 | 00 00 00 10 | FF FF FF FF FC 02 CA 14 94 3D 20 B9 E7 F8 00 00")
 		v, err := dec.BigInteger(0x420020)
 		s.NoError(err)
 		s.Equal(b, v)
