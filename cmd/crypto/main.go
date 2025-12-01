@@ -29,15 +29,24 @@ var (
 	serveModules = []module.EmbeddedModule{
 		kmipserver.New(),
 	}
+	serveEdgeModules = []module.EmbeddedModule{
+		kmipserver.New(),
+	}
 	migrateModules = []module.EmbeddedModule{
 		dbmigrate.New(),
 	}
 
 	serve = &cobra.Command{
-		Use:   "run",
+		Use:   "serve",
 		Short: "Start all enabled Crypto service modules and run the server.",
 		Args:  cobra.NoArgs,
 		RunE:  cmds.RunServeWithGracefulShutdown(serveModules),
+	}
+	edge = &cobra.Command{
+		Use:   "edge",
+		Short: "Start all enabled Crypto Edge service modules and run the server.",
+		Args:  cobra.NoArgs,
+		RunE:  cmds.RunServeWithGracefulShutdown(serveEdgeModules),
 	}
 	migrate = &cobra.Command{
 		Use:   "dbmigrate",
@@ -77,6 +86,7 @@ func main() {
 	cmd.RootCmd.Version = cfg.Application.BuildInfo.Version
 	err = cmds.SetupRootCommand(cmd.RootCmd, cfg, map[*cobra.Command][]module.EmbeddedModule{
 		serve:   serveModules,
+		edge:    serveEdgeModules,
 		migrate: migrateModules,
 	})
 	if err != nil {
