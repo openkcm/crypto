@@ -8,20 +8,20 @@ import (
 	"github.com/openkcm/crypto/kmip"
 )
 
-type Handler struct {
+type CryptoHandler struct {
 	config   *config.Config
 	registry actions.ReadRegistry
 }
 
-func NewHandler(registry actions.ReadRegistry, config *config.Config) (*Handler, error) {
-	return &Handler{
+func NewCryptoHandler(registry actions.ReadRegistry, config *config.Config) (*CryptoHandler, error) {
+	return &CryptoHandler{
 		config: config,
 
 		registry: registry,
 	}, nil
 }
 
-func (h *Handler) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {
+func (h *CryptoHandler) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {
 	responseItems := []kmip.ResponseBatchItem{}
 	for _, item := range req.BatchItem {
 		respItem := kmip.ResponseBatchItem{

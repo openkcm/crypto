@@ -23,27 +23,27 @@ import (
 )
 
 const (
-	moduleCryptoName = "kmip-crypto"
+	moduleCryptoEdgeName = "kmip-crypto-edge"
 )
 
 // kmipEdgeServerModule implements module.EmbeddedModule interface.
-type kmipCryptoServerModule struct {
+type kmipEdgeServerModule struct {
 	config *config.Config
 
 	fs *pflag.FlagSet
 }
 
-var _ module.EmbeddedModule = (*kmipCryptoServerModule)(nil)
+var _ module.EmbeddedModule = (*kmipEdgeServerModule)(nil)
 
-func NewCrypto() module.EmbeddedModule {
-	return &kmipCryptoServerModule{}
+func NewCryptoEdge() module.EmbeddedModule {
+	return &kmipEdgeServerModule{}
 }
 
 // Name implements main.embeddedService interface.
-func (s *kmipCryptoServerModule) Name() string { return moduleCryptoName }
+func (s *kmipEdgeServerModule) Name() string { return moduleCryptoEdgeName }
 
 // Init implements main.embeddedService interface.
-func (s *kmipCryptoServerModule) Init(cfg any, serveCmd *cobra.Command) error {
+func (s *kmipEdgeServerModule) Init(cfg any, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
 
@@ -52,10 +52,10 @@ func (s *kmipCryptoServerModule) Init(cfg any, serveCmd *cobra.Command) error {
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *kmipCryptoServerModule) RunServe(ctxStartup, ctxShutdown context.Context, shutdown func()) (err error) {
+func (s *kmipEdgeServerModule) RunServe(ctxStartup, ctxShutdown context.Context, shutdown func()) (err error) {
 	err = concurrent.Setup(ctxStartup, map[any]concurrent.SetupFunc{})
 	if err != nil {
-		return oops.In(moduleCryptoName).Wrapf(err, "failed to setup kmipEdgeServerModule")
+		return oops.In(moduleCryptoEdgeName).Wrapf(err, "failed to setup kmipEdgeServerModule")
 	}
 
 	svcs := []concurrent.ServiceFunc{
@@ -69,16 +69,16 @@ func (s *kmipCryptoServerModule) RunServe(ctxStartup, ctxShutdown context.Contex
 	}
 	err = concurrent.Serve(ctxShutdown, shutdown, svcs...)
 	if err != nil {
-		return oops.In(moduleCryptoName).Wrapf(err, "Failed to server kmip server")
+		return oops.In(moduleCryptoEdgeName).Wrapf(err, "Failed to server kmip server")
 	}
 	return nil
 }
 
-func (s *kmipCryptoServerModule) serveMetrics(_ context.Context) error {
+func (s *kmipEdgeServerModule) serveMetrics(_ context.Context) error {
 	return nil
 }
 
-func (s *kmipCryptoServerModule) serveKMIPTCPServer(ctx context.Context) error {
+func (s *kmipEdgeServerModule) serveKMIPTCPServer(ctx context.Context) error {
 	cfg := s.config.KMIPServer.TCP
 
 	address := cfg.Address
@@ -96,7 +96,7 @@ func (s *kmipCryptoServerModule) serveKMIPTCPServer(ctx context.Context) error {
 		return oops.Wrapf(err, "failed to listen on %s", address)
 	}
 
-	handler, err := kmiphandler.NewCryptoHandler(
+	handler, err := kmiphandler.NewCryptoEdgeHandler(
 		configureRegistry(actions.NewRegistry(), &cfg.KMIPOperation),
 		s.config,
 	)
@@ -107,12 +107,12 @@ func (s *kmipCryptoServerModule) serveKMIPTCPServer(ctx context.Context) error {
 	return createStartKMIPTcpServer(ctx, kmipserver.WithListener(ln), kmipserver.WithHandler(handler))
 }
 
-func (s *kmipCryptoServerModule) serveKMIPHTTPServer(ctx context.Context) error {
+func (s *kmipEdgeServerModule) serveKMIPHTTPServer(ctx context.Context) error {
 	cfg := s.config.KMIPServer.HTTP
 
 	tlsConfig, _ := commoncfg.LoadMTLSConfig(cfg.TLS)
 
-	handler, err := kmiphandler.NewCryptoHandler(
+	handler, err := kmiphandler.NewCryptoEdgeHandler(
 		configureRegistry(actions.NewRegistry(), &cfg.KMIPOperation),
 		s.config,
 	)
@@ -138,7 +138,7 @@ func (s *kmipCryptoServerModule) serveKMIPHTTPServer(ctx context.Context) error 
 	return err
 }
 
-func (s *kmipCryptoServerModule) validate() error {
+func (s *kmipEdgeServerModule) validate() error {
 	if s.config == nil {
 		return errors.New("missing configuration")
 	}

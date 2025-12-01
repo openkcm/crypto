@@ -27,10 +27,10 @@ var (
 
 var (
 	serveModules = []module.EmbeddedModule{
-		kmipserver.New(),
+		kmipserver.NewCrypto(),
 	}
 	serveEdgeModules = []module.EmbeddedModule{
-		kmipserver.New(),
+		kmipserver.NewCryptoEdge(),
 	}
 	migrateModules = []module.EmbeddedModule{
 		dbmigrate.New(),
