@@ -81,6 +81,7 @@ linters:
           - maintidx
         path: (.+)_test\.go
     paths:
+      - kmip
       - vendor
       - third_party$
       - builtin$

@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 
+	"github.com/samber/oops"
+
+	slogctx "github.com/veqryn/slog-context"
+
 	"github.com/openkcm/crypto/internal/actions"
 	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/kmip"
 	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/samber/oops"
-	slogctx "github.com/veqryn/slog-context"
 )
 
 func createStartKMIPTcpServer(ctx context.Context, options ...kmipserver.Option) error {

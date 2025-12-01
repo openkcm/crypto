@@ -3,12 +3,12 @@ package dbmigrate
 import (
 	"context"
 
-	"github.com/openkcm/crypto/internal/modules"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/modules"
 	"github.com/openkcm/crypto/pkg/concurrent"
 	"github.com/openkcm/crypto/pkg/module"
 )

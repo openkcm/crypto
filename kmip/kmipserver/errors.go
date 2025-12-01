@@ -101,5 +101,4 @@ func handleBatchItemError(ctx context.Context, bi *kmip.ResponseBatchItem, err e
 	} else {
 		slog.Error("KMIP Batch Item Error", "error", err)
 	}
-
 }

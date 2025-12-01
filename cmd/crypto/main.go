@@ -8,7 +8,6 @@ import (
 
 	"github.com/openkcm/common-sdk/pkg/logger"
 	"github.com/openkcm/common-sdk/pkg/otlp"
-	"github.com/openkcm/crypto/internal/modules/kmipserver"
 	"github.com/spf13/cobra"
 
 	slogctx "github.com/veqryn/slog-context"
@@ -16,6 +15,7 @@ import (
 	"github.com/openkcm/crypto/cmd"
 	"github.com/openkcm/crypto/internal/config"
 	dbmigrate "github.com/openkcm/crypto/internal/modules/db-migrate"
+	"github.com/openkcm/crypto/internal/modules/kmipserver"
 	"github.com/openkcm/crypto/pkg/cmds"
 	"github.com/openkcm/crypto/pkg/module"
 )
