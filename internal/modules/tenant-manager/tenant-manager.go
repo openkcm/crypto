@@ -33,7 +33,7 @@ func New() module.EmbeddedModule {
 func (s *tenantManagerModule) Name() string { return moduleName }
 
 // Init implements main.embeddedService interface.
-func (s *tenantManagerModule) Init(cfg any, cmd, serveCmd *cobra.Command) error {
+func (s *tenantManagerModule) Init(cfg any, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
 

@@ -43,15 +43,19 @@ type TerminateHook func(context.Context)
 // hooks for connect and terminate events, allowing customization of behavior when a client
 // connects or disconnects.
 type Server struct {
-	listener   net.Listener
-	handler    RequestHandler
-	ctx        context.Context
-	cancel     func()
+	listener net.Listener
+	handler  RequestHandler
+
+	ctx    context.Context
+	cancel func()
+
 	recvCtx    context.Context
 	recvCancel func()
-	wg         *sync.WaitGroup
-	onConnect  ConnectHook
-	onClose    TerminateHook
+
+	wg *sync.WaitGroup
+
+	onConnect ConnectHook
+	onClose   TerminateHook
 }
 
 type Option func(*Server) error
@@ -122,25 +126,24 @@ func (srv *Server) terminateHook(ctx context.Context) {
 // It panics if the handler is nil. The function initializes internal contexts for server control and
 // request reception, as well as a WaitGroup for managing goroutines.
 func NewServer(ctx context.Context, options ...Option) (*Server, error) {
-	ctx, cancel := context.WithCancel(ctx)
-	recvCtx, recvCancel := context.WithCancel(ctx)
+	rootCtx, cancel := context.WithCancel(ctx)
+	recvCtx, recvCancel := context.WithCancel(rootCtx)
 
 	srv := &Server{
-		ctx:        ctx,
+		ctx:        rootCtx,
 		cancel:     cancel,
 		recvCtx:    recvCtx,
 		recvCancel: recvCancel,
-		wg:         new(sync.WaitGroup),
+		wg:         &sync.WaitGroup{},
 	}
 
-	for _, option := range options {
-		if err := option(srv); err != nil {
+	for _, opt := range options {
+		if err := opt(srv); err != nil {
 			return nil, err
 		}
 	}
 
-	err := srv.validate()
-	if err != nil {
+	if err := srv.validate(); err != nil {
 		return nil, err
 	}
 
@@ -152,7 +155,8 @@ func NewServer(ctx context.Context, options ...Option) (*Server, error) {
 // If the listener is closed, it returns ErrShutdown. Any other error encountered
 // during Accept is returned immediately. The method blocks until the server is shut down.
 func (srv *Server) Serve() error {
-	slog.Info("Running KMIP server", "bind", srv.listener.Addr())
+	slog.Info("KMIP server running", "bind", srv.listener.Addr())
+
 	for {
 		conn, err := srv.listener.Accept()
 		if err != nil {
@@ -161,6 +165,7 @@ func (srv *Server) Serve() error {
 			}
 			return fmt.Errorf("KMIP server shutting down: %w", err)
 		}
+
 		srv.wg.Add(1)
 		go srv.handleConn(conn)
 	}
@@ -175,48 +180,51 @@ func (srv *Server) Serve() error {
 // 6. Cancels the server's root context.
 // Returns any error encountered while closing the listener.
 func (srv *Server) Shutdown() error {
-	// 1. Close listener to prevent new incoming conections
 	err := srv.listener.Close()
-	// 2. Cancel recvCtx to stop receiving new requests
+
 	srv.recvCancel()
-	// 3. Set a timeout to force server context cancellation after 3 seconds.
-	tm := time.AfterFunc(3*time.Second, func() {
-		srv.cancel()
-	})
-	// 4. Wait for running requests completion
+
+	// Force-stop after grace period
+	timer := time.AfterFunc(3*time.Second, srv.cancel)
+
 	srv.wg.Wait()
-	tm.Stop()
-	// 5. Cancel server root context
+	timer.Stop()
+
 	srv.cancel()
 	return err
 }
 
 func (srv *Server) handleConn(conn net.Conn) {
 	defer srv.wg.Done()
+
 	logger := slog.With("addr", conn.RemoteAddr())
-	logger.Info("New connection")
+	logger.Info("Connection established")
+
+	// TLS handshake, if applicable
 	var tlsState *tls.ConnectionState
 	if tcon, ok := conn.(*tls.Conn); ok {
 		if err := tcon.Handshake(); err != nil {
-			_ = tcon.Close()
-			logger.Warn("TLS handshake failure. Closing client connection", "err", err)
+			_ = conn.Close()
+			logger.Warn("TLS handshake failure", "err", err)
 			return
 		}
-		tlsState = new(tls.ConnectionState)
-		*tlsState = tcon.ConnectionState()
+		cs := tcon.ConnectionState()
+		tlsState = &cs
 	}
-	stream := newConn(conn, srv.ctx, logger)
-	// TODO: Save ref in server
-	// TODO: Remove ref on connection termination
+
+	stream := newConn(srv.ctx, &connConfig{
+		netCon:        conn,
+		streamMaxSize: 15,
+		logger:        logger,
+	})
 	defer stream.Close()
 
-	// Create a client connection state aware context
+	// Per-connection context
 	ctx := newConnContext(stream.ctx, conn.RemoteAddr().String(), tlsState)
 
-	// Call the connections hooks to modify the context and cleanup as the connection is closed
 	ctx, err := srv.connectHook(ctx)
 	if err != nil {
-		logger.Warn("connection hook failed", "err", err)
+		logger.Warn("Connect hook aborted connection", "err", err)
 		return
 	}
 	defer srv.terminateHook(ctx)
@@ -225,35 +233,28 @@ func (srv *Server) handleConn(conn net.Conn) {
 		msg, err := stream.recv(srv.recvCtx)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				logger.Info("Client connection closed")
-				break
-			}
-			logger.Error("Failed to read data from client", "err", err)
+				logger.Info("Client closed connection")
+			} else {
+				logger.Error("Failed to read from client", "err", err)
 
-			if ttlv.IsErrEncoding(err) {
-				resp := srv.handleMessageError(ctx, msg, kmip.ResultReasonInvalidMessage, err.Error())
-				if err := stream.send(resp); err != nil {
-					logger.Warn("Fail to write data", "err", err)
+				// Return KMIP encoding error
+				if ttlv.IsErrEncoding(err) {
+					resp := srv.handleMessageError(ctx, msg, kmip.ResultReasonInvalidMessage, err.Error())
+					_ = stream.send(resp)
 				}
 			}
-			break
+			return
 		}
-		// go func() {
-		// 	select {
-		// 	case <-srv.recvCtx.Done():
-		// 		TODO: cancel running task
-		// 	case <-stream.ctx.Done():
-		// 	}
-		// }()
+
 		resp := srv.handleRequest(ctx, msg)
 		if ctx.Err() != nil {
-			logger.Warn("Request processing aborted", "err", ctx.Err())
-			break
+			logger.Warn("Request aborted", "err", ctx.Err())
+			return
 		}
 
 		if err := stream.send(resp); err != nil {
-			logger.Warn("Fail to write data. Closing client connection", "err", err)
-			break
+			logger.Warn("Failed sending response", "err", err)
+			return
 		}
 	}
 }
@@ -263,8 +264,6 @@ func (srv *Server) handleMessageError(ctx context.Context, req *kmip.RequestMess
 }
 
 func (srv *Server) handleRequest(ctx context.Context, req *kmip.RequestMessage) (resp *kmip.ResponseMessage) {
-	//srv.reqWg.Add(1)
-	//defer srv.reqWg.Done()
 	defer func() {
 		if err := recover(); err != nil {
 			resp = srv.handleMessageError(ctx, req, kmip.ResultReasonIllegalOperation, "")

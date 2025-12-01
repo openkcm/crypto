@@ -34,10 +34,7 @@ func SetupRootCommand(rootCmd *cobra.Command, cfg *config.Config, modules map[*c
 			}
 			seen[name] = true
 
-			err := s.Init(cfg, &cobra.Command{
-				Use:   s.Name(),
-				Short: fmt.Sprintf("Run %s microservice's command", name),
-			}, servedCmd)
+			err := s.Init(cfg, servedCmd)
 			if err != nil {
 				return oops.Wrapf(err, "failed to init module %s", name)
 			}

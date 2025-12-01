@@ -15,7 +15,7 @@ import (
 	"github.com/openkcm/crypto/cmd"
 	"github.com/openkcm/crypto/internal/config"
 	dbmigrate "github.com/openkcm/crypto/internal/modules/db-migrate"
-	kmiptcp "github.com/openkcm/crypto/internal/modules/kmip-tcp"
+	"github.com/openkcm/crypto/internal/modules/kmiptcpserver"
 	"github.com/openkcm/crypto/pkg/cmds"
 	"github.com/openkcm/crypto/pkg/module"
 )
@@ -27,7 +27,7 @@ var (
 
 var (
 	serveModules = []module.EmbeddedModule{
-		kmiptcp.New(),
+		kmiptcpserver.New(),
 	}
 	migrateModules = []module.EmbeddedModule{
 		dbmigrate.New(),

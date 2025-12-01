@@ -49,22 +49,27 @@ type conn struct {
 	logger *slog.Logger
 }
 
+type connConfig struct {
+	netCon        net.Conn
+	streamMaxSize int
+	logger        *slog.Logger
+}
+
 // newConn initializes and returns a new conn instance for handling KMIP protocol communication.
 // It sets up the internal TTLV stream with a maximum size of 1 MB, initializes transmission and
 // reception channels, and starts the read and write loops in separate goroutines. The provided
 // context is wrapped to support cancellation with cause, and the given logger is used for logging.
 // The function is intended to be used for each new network connection.
-func newConn(netCon net.Conn, ctx context.Context, logger *slog.Logger) *conn {
+func newConn(ctx context.Context, netCfg *connConfig) *conn {
 	ctx, cancel := context.WithCancelCause(ctx)
 	c := &conn{
-		//TODO: Make max size configurable
-		stream: ttlv.NewStream(netCon, 1*1024*1024), // Max Size is 1 MB
+		stream: ttlv.NewStream(netCfg.netCon, netCfg.streamMaxSize*1024*1024), // Max Size is 1 MB
 		tx:     atomic.Value{},
 		rx:     make(chan rxMsg),
 		ctx:    ctx,
 		cancel: cancel,
 		closed: atomic.Bool{},
-		logger: logger,
+		logger: netCfg.logger,
 	}
 	c.tx.Store(make(chan txMsg))
 	go c.readloop()

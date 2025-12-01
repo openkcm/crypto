@@ -1,20 +1,24 @@
-package kmiptcp
+package kmiptcpserver
 
 import (
 	"context"
 
 	"github.com/openkcm/crypto/internal/actions"
+	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/kmip"
 )
 
 type Handler struct {
+	config   *config.Config
 	registry actions.ReadRegistry
 }
 
-func NewHandler(registry actions.ReadRegistry) *Handler {
+func NewHandler(registry actions.ReadRegistry, config *config.Config) (*Handler, error) {
 	return &Handler{
+		config: config,
+
 		registry: registry,
-	}
+	}, nil
 }
 
 func (h *Handler) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {

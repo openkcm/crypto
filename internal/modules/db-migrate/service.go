@@ -32,7 +32,7 @@ func New() module.EmbeddedModule {
 func (s *dbMigrateModule) Name() string { return moduleName }
 
 // Init implements main.embeddedService interface.
-func (s *dbMigrateModule) Init(cfg any, cmd, serveCmd *cobra.Command) error {
+func (s *dbMigrateModule) Init(cfg any, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
 
