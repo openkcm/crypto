@@ -1,3 +1,5 @@
+{{- if .Values.tenantManager.enabled | default false }}
+
 {{- if .Values.tenantManager.hpa.enabled }}
 ---
 apiVersion: autoscaling/v2
