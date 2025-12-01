@@ -6,3 +6,13 @@ status:
   enabled: true
   address: ":8888"
   profiling: true
+
+kmip:
+  tcp:
+    enabled: true
+    address: ":5696"
+  http:
+    enabled: true
+    address: ":8080"
+    operation:
+      only: [ 0x1, 0x2, 0x3 ]

@@ -11,6 +11,8 @@ import (
 // SetupFunc is described in Setup.
 type SetupFunc func(context.Context) (any, error)
 
+type ServiceFunc func(context.Context) error
+
 // Setup processes map which keys must be references to variables and
 // values must be functions which returns values for these variables to
 // run in parallel all functions which corresponding variables is nil.
@@ -56,7 +58,7 @@ func Setup(ctx context.Context, vars map[any]SetupFunc) error {
 // exit.
 //
 // Returns error of first service which returned non-nil error, if any.
-func Serve(ctx context.Context, cancel func(), services ...func(context.Context) error) (err error) {
+func Serve(ctx context.Context, cancel func(), services ...ServiceFunc) (err error) {
 	errc := make(chan error)
 	for _, service := range services {
 		go func() {

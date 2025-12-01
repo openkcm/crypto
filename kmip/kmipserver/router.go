@@ -1,0 +1,294 @@
+package kmipserver
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"runtime/debug"
+	"slices"
+	"time"
+
+	"github.com/openkcm/crypto/kmip"
+	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/crypto/kmip/ttlv"
+)
+
+var defaultSupportedVersion = []kmip.ProtocolVersion{kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
+
+// OperationHandler defines an interface for handling KMIP operations.
+// Implementations of this interface should provide logic to process a specific
+// KMIP operation by handling the provided request payload and returning a response
+// payload or an error if the operation fails.
+type OperationHandler interface {
+	HandleOperation(ctx context.Context, req kmip.OperationPayload) (kmip.OperationPayload, error)
+}
+
+type handlerFunc func(ctx context.Context, req kmip.OperationPayload) (kmip.OperationPayload, error)
+
+func (h handlerFunc) HandleOperation(ctx context.Context, req kmip.OperationPayload) (kmip.OperationPayload, error) {
+	return h(ctx, req)
+}
+
+// HandleFunc wraps a strongly-typed handler function into an OperationHandler.
+// It accepts a handler function h that takes a context and a request of type Req,
+// and returns a response of type Resp and an error. Both Req and Resp must satisfy
+// the kmip.OperationPayload interface. The returned OperationHandler performs a type
+// assertion on the incoming request payload and invokes the handler if the assertion
+// succeeds. If the type assertion fails, it returns an error indicating an invalid payload.
+// This function is intended to simplify the creation of operation handlers by providing
+// type safety and reducing boilerplate code.
+func HandleFunc[Req, Resp kmip.OperationPayload](h func(ctx context.Context, req Req) (Resp, error)) OperationHandler {
+	return handlerFunc(func(ctx context.Context, req kmip.OperationPayload) (kmip.OperationPayload, error) {
+		payload, ok := req.(Req)
+		if !ok {
+			// TODO: Should probably be a panic here as this can only be caused by a programming error.
+			return nil, errors.New("Invalid payload")
+		}
+		return h(ctx, payload)
+	})
+}
+
+// BatchExecutor is responsible for executing KMIP batch operations.
+// It maintains a mapping of KMIP operations to their corresponding handlers,
+// a list of middleware functions to be applied to each operation, and a list
+// of supported KMIP protocol versions.
+type BatchExecutor struct {
+	routes            map[kmip.Operation]OperationHandler
+	middlewares       []Middleware
+	biMiddlewares     []BatchItemMiddleware
+	supportedVersions []kmip.ProtocolVersion
+}
+
+// NewBatchExecutor creates and returns a new instance of BatchExecutor with initialized routes map,
+// no middlewares, and the default set of supported KMIP protocol versions.
+func NewBatchExecutor() *BatchExecutor {
+	return &BatchExecutor{
+		routes:            make(map[kmip.Operation]OperationHandler),
+		middlewares:       nil,
+		biMiddlewares:     nil,
+		supportedVersions: defaultSupportedVersion,
+	}
+}
+
+// SetSupportedProtocolVersions sets the supported KMIP protocol versions for the BatchExecutor.
+// If no versions are provided, it defaults to the predefined supported versions.
+// The provided versions are sorted and duplicates are removed before being set.
+func (exec *BatchExecutor) SetSupportedProtocolVersions(versions ...kmip.ProtocolVersion) {
+	if len(versions) == 0 {
+		versions = defaultSupportedVersion
+	}
+	slices.SortFunc(versions, ttlv.CompareVersions)
+	versions = slices.Compact(versions)
+	exec.supportedVersions = versions
+}
+
+// Use adds one or more Middleware functions to the BatchExecutor's middleware chain.
+// The provided middleware will be executed in the order they are added.
+func (exec *BatchExecutor) Use(m ...Middleware) {
+	exec.middlewares = append(exec.middlewares, m...)
+}
+
+func (exec *BatchExecutor) BatchItemUse(m ...BatchItemMiddleware) {
+	exec.biMiddlewares = append(exec.biMiddlewares, m...)
+}
+
+// Route registers an OperationHandler for a specific KMIP operation.
+// It associates the given handler (hdl) with the provided operation (op)
+// in the BatchExecutor's routing table, allowing the executor to dispatch
+// requests for that operation to the appropriate handler.
+func (exec *BatchExecutor) Route(op kmip.Operation, hdl OperationHandler) {
+	exec.routes[op] = hdl
+}
+
+// HandleRequest processes a KMIP request message through a chain of middlewares and returns a response message.
+// It initializes a middleware execution chain, passing the request and context through each middleware in order.
+// If all middlewares are executed without error, the request is handled by the core request handler.
+// If an error occurs during processing, it returns an error response message.
+//
+// Parameters:
+//   - ctx: The context for request-scoped values, deadlines, and cancellation signals.
+//   - req: The KMIP request message to be processed.
+//
+// Returns:
+//   - *kmip.ResponseMessage: The KMIP response message generated by the handler or error handler.
+//
+// Errors:
+//   - This function does not return errors directly. If an error occurs during middleware or request handling,
+//     the error is converted into a KMIP error response message.
+func (exec *BatchExecutor) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {
+	i := 0
+	var next Next
+	next = func(ctx context.Context, rm *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+		if i < len(exec.middlewares) {
+			mdl := exec.middlewares[i]
+			i++
+			return mdl(next, ctx, req)
+		}
+		return exec.handleRequest(ctx, req)
+	}
+
+	ctx = newBatchContext(ctx, req.Header)
+	resp, err := next(ctx, req)
+
+	if err != nil {
+		return exec.handleMessageError(ctx, req, err)
+	}
+	return resp
+}
+
+// handleRequest is the core handler for KMIP request messages after middleware processing.
+// It checks protocol version compatibility, validates batch count, and processes each batch item.
+// If an error occurs, it returns a KMIP error with the appropriate result reason.
+//
+// Parameters:
+//   - ctx: The context for request-scoped values, deadlines, and cancellation signals.
+//   - req: The KMIP request message to be processed.
+//
+// Returns:
+//   - *kmip.ResponseMessage: The KMIP response message generated by processing the request.
+//   - error: If the protocol version is unsupported, batch count mismatches, or a batch item fails and
+//     BatchErrorContinuationOption is set to Stop, an error is returned.
+func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+	//TODO: Check request timestamp
+	//TODO: Check other header params
+
+	// Check for version compatibility
+	if !slices.Contains(exec.supportedVersions, req.Header.ProtocolVersion) {
+		return nil, Errorf(kmip.ResultReasonInvalidMessage, "Unsupported protocol version")
+	}
+
+	errorContinuationOption := kmip.BatchErrorContinuationOptionContinue
+	if co := req.Header.BatchErrorContinuationOption; co > 0 {
+		if co == kmip.BatchErrorContinuationOptionUndo {
+			// Reject request if set to Undo as we don't support transactions
+			return nil, Errorf(kmip.ResultReasonFeatureNotSupported, `"Undo" BatchErrorContinuationOption is not supported`)
+		}
+		errorContinuationOption = co
+	}
+
+	if int(req.Header.BatchCount) != len(req.BatchItem) {
+		return nil, Errorf(kmip.ResultReasonInvalidMessage, "Batch Count Mismatch")
+	}
+	response := &kmip.ResponseMessage{
+		Header: kmip.ResponseHeader{
+			ProtocolVersion:        req.Header.ProtocolVersion,
+			TimeStamp:              time.Now(),
+			BatchCount:             req.Header.BatchCount,
+			ClientCorrelationValue: req.Header.ClientCorrelationValue,
+		},
+		BatchItem: make([]kmip.ResponseBatchItem, len(req.BatchItem)),
+	}
+
+	stopped := false
+	for i := range req.BatchItem {
+		if stopped {
+			response.BatchItem[i] = kmip.ResponseBatchItem{
+				Operation:         req.BatchItem[i].Operation,
+				UniqueBatchItemID: req.BatchItem[i].UniqueBatchItemID,
+				ResultStatus:      kmip.ResultStatusOperationFailed,
+				ResultReason:      kmip.ResultReasonOperationCanceledByRequester,
+				ResultMessage:     "Batch has stopped because of an error",
+			}
+			continue
+		}
+
+		response.BatchItem[i] = exec.executeItemWithMiddleware(ctx, &req.BatchItem[i])
+		if (response.BatchItem[i].ResultStatus == kmip.ResultStatusOperationFailed) && errorContinuationOption == kmip.BatchErrorContinuationOptionStop {
+			stopped = true
+		}
+	}
+	return response, nil
+}
+
+// executeItemWithMiddleware executes a KMIP request batch item with the provided middleware.
+func (exec *BatchExecutor) executeItemWithMiddleware(ctx context.Context, bi *kmip.RequestBatchItem) (resp kmip.ResponseBatchItem) {
+	m := 0
+	var next BatchItemNext
+	next = func(ctx context.Context, bi *kmip.RequestBatchItem) (*kmip.ResponseBatchItem, error) {
+		if m < len(exec.biMiddlewares) {
+			biMdl := exec.biMiddlewares[m]
+			m++
+			return biMdl(next, ctx, bi)
+		}
+		return exec.executeItem(ctx, bi)
+	}
+	respBi, err := next(ctx, bi)
+	if err != nil {
+		handleBatchItemError(ctx, respBi, err)
+	}
+	return *respBi
+}
+
+func (exec *BatchExecutor) executeItem(ctx context.Context, bi *kmip.RequestBatchItem) (resp *kmip.ResponseBatchItem, err error) {
+	resp = &kmip.ResponseBatchItem{
+		Operation:         bi.Operation,
+		UniqueBatchItemID: bi.UniqueBatchItemID,
+	}
+	defer func() {
+		err := recover()
+		if err == nil {
+			return
+		}
+		slog.Error("Batch item handler panicked", "err", err)
+		slog.Error("STACK TRACE: " + string(debug.Stack()))
+		var e error
+		switch er := err.(type) {
+		case error:
+			e = er
+		case string:
+			e = errors.New(er)
+		case fmt.Stringer:
+			e = errors.New(er.String())
+		default:
+			//TODO: Do not return the error message, but log it instead
+			e = fmt.Errorf("Internal Server Error: %s", er)
+		}
+		exec.handleBatchItemError(ctx, resp, e)
+	}()
+
+	if me := bi.MessageExtension; me != nil {
+		if me.CriticalityIndicator {
+			return resp, Errorf(kmip.ResultReasonFeatureNotSupported, "Critical message extension not supported")
+		}
+	}
+
+	switch pl := bi.RequestPayload.(type) {
+	case *payloads.DiscoverVersionsRequestPayload:
+		if route, ok := exec.routes[bi.Operation]; ok {
+			resp.ResponsePayload, err = route.HandleOperation(ctx, pl)
+		} else {
+			resp.ResponsePayload = exec.handleDiscover(pl)
+		}
+	default:
+		route, ok := exec.routes[bi.Operation]
+		if !ok {
+			err = ErrOperationNotSupported
+			break
+		}
+		resp.ResponsePayload, err = route.HandleOperation(ctx, pl)
+	}
+	return resp, err
+}
+
+func (exec *BatchExecutor) handleBatchItemError(ctx context.Context, bi *kmip.ResponseBatchItem, err error) {
+	handleBatchItemError(ctx, bi, err)
+}
+
+func (exec *BatchExecutor) handleMessageError(ctx context.Context, req *kmip.RequestMessage, err error) *kmip.ResponseMessage {
+	return handleMessageError(ctx, req, err)
+}
+
+func (exec *BatchExecutor) handleDiscover(req *payloads.DiscoverVersionsRequestPayload) *payloads.DiscoverVersionsRequestPayload {
+	resp := &payloads.DiscoverVersionsRequestPayload{}
+	if len(req.ProtocolVersion) == 0 {
+		resp.ProtocolVersion = exec.supportedVersions
+		return resp
+	}
+	for _, v := range exec.supportedVersions {
+		if slices.Contains(req.ProtocolVersion, v) {
+			resp.ProtocolVersion = append(resp.ProtocolVersion, v)
+		}
+	}
+	return resp
+}

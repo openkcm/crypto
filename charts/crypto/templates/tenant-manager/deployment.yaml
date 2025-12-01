@@ -1,3 +1,5 @@
+{{- if .Values.tenantManager.enabled | default false }}
+
 {{- $mergedTenantMamangerExtraEnvsFrom := list }}
 
 {{- if .Values.tenantManager.extraEnvsFrom }}
@@ -139,3 +141,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 6 }}
       {{- end }}
+{{- end }}
