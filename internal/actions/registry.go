@@ -8,13 +8,15 @@ import (
 )
 
 var (
-	registeredActions = map[kmip.Operation]Action{
-		kmip.OperationCreate: &createAction{},
-	}
+	registeredActions = map[kmip.Operation]Action{}
 )
 
-func Register(op kmip.Operation, action Action) {
-	registeredActions[op] = action
+func init() {
+	Register(&createAction{})
+}
+
+func Register(action Action) {
+	registeredActions[action.Operation()] = action
 }
 
 type ReadRegistry interface {
@@ -37,14 +39,15 @@ type registry struct {
 func NewRegistry() Registry {
 	tmp := make(map[kmip.Operation]Action)
 
-	maps.Copy(registeredActions, tmp)
+	maps.Copy(tmp, registeredActions)
 	return &registry{
+		mu:      sync.RWMutex{},
 		actions: tmp,
 	}
 }
 
 func (r *registry) Add(operations ...kmip.Operation) {
-	r.mu.Unlock()
+	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for _, op := range operations {
@@ -55,7 +58,7 @@ func (r *registry) Add(operations ...kmip.Operation) {
 }
 
 func (r *registry) Remove(operations ...kmip.Operation) {
-	r.mu.Unlock()
+	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for _, op := range operations {
@@ -64,7 +67,7 @@ func (r *registry) Remove(operations ...kmip.Operation) {
 }
 
 func (r *registry) KeepOnly(operations ...kmip.Operation) {
-	r.mu.Unlock()
+	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	keepOps := make(map[kmip.Operation]struct{})
@@ -81,7 +84,7 @@ func (r *registry) KeepOnly(operations ...kmip.Operation) {
 }
 
 func (r *registry) Lookup(operation kmip.Operation) Action {
-	r.mu.RUnlock()
+	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	action, ok := r.actions[operation]

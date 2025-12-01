@@ -7,5 +7,6 @@ import (
 )
 
 type Action interface {
+	Operation() kmip.Operation
 	Execute(ctx context.Context) (kmip.OperationPayload, error)
 }

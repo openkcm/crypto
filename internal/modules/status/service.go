@@ -3,6 +3,7 @@ package dbmigrate
 import (
 	"context"
 
+	"github.com/openkcm/crypto/internal/modules"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -13,26 +14,26 @@ import (
 )
 
 var (
-	moduleName = "dbmigrate"
+	moduleName = "status"
 )
 
-// dbMigrateModule implements module.EmbeddedModule interface.
-type dbMigrateModule struct {
+// statusModule implements module.EmbeddedModule interface.
+type statusModule struct {
 	config *config.Config
 	fs     *pflag.FlagSet
 }
 
-var _ module.EmbeddedModule = (*dbMigrateModule)(nil)
+var _ module.EmbeddedModule = (*statusModule)(nil)
 
 func New() module.EmbeddedModule {
-	return &dbMigrateModule{}
+	return &statusModule{}
 }
 
 // Name implements main.embeddedService interface.
-func (s *dbMigrateModule) Name() string { return moduleName }
+func (s *statusModule) Name() string { return moduleName }
 
 // Init implements main.embeddedService interface.
-func (s *dbMigrateModule) Init(cfg any, serveCmd *cobra.Command) error {
+func (s *statusModule) Init(cfg any, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
 
@@ -41,14 +42,14 @@ func (s *dbMigrateModule) Init(cfg any, serveCmd *cobra.Command) error {
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *dbMigrateModule) RunServe(ctxStartup, ctxShutdown context.Context, shutdown func()) (err error) {
+func (s *statusModule) RunServe(ctxStartup, ctxShutdown context.Context, shutdown func()) (err error) {
 	err = concurrent.Setup(ctxStartup, map[any]concurrent.SetupFunc{})
 	if err != nil {
-		return oops.In(moduleName).Wrapf(err, "failed to setup dbMigrateModule")
+		return oops.In(moduleName).Wrapf(err, "failed to setup statusModule")
 	}
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
-		s.serveDatabaseMigrate,
+		s.serveStatusServer,
 	)
 	if err != nil {
 		return oops.In(moduleName).Wrapf(err, "Failed to server kmip server")
@@ -56,6 +57,6 @@ func (s *dbMigrateModule) RunServe(ctxStartup, ctxShutdown context.Context, shut
 	return nil
 }
 
-func (s *dbMigrateModule) serveDatabaseMigrate(ctx context.Context) error {
-	return nil
+func (s *statusModule) serveStatusServer(ctx context.Context) error {
+	return modules.ServeStatus(ctx, &s.config.BaseConfig)
 }

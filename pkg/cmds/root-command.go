@@ -70,7 +70,7 @@ func RunServeWithGracefulShutdown(modules []module.EmbeddedModule) func(cmd *cob
 
 		slogctx.Info(ctx, "Initializing command ...")
 
-		services := make([]func(ctx context.Context) error, len(modules))
+		services := make([]concurrent.ServiceFunc, len(modules))
 
 		for i := range modules {
 			name := modules[i].Name()

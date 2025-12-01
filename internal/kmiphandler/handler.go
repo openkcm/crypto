@@ -1,4 +1,4 @@
-package kmiptcpserver
+package kmiphandler
 
 import (
 	"context"
