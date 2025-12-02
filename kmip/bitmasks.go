@@ -10,6 +10,7 @@ import (
 // init registers the bitmask string representations for CryptographicUsageMask and StorageStatusMask
 // with the KMIP TTLV package. This enables human-readable string formatting and parsing for these bitmask types.
 func init() {
+
 	ttlv.RegisterBitmask[CryptographicUsageMask](
 		TagCryptographicUsageMask,
 		"Sign",
@@ -32,11 +33,34 @@ func init() {
 		"TranslateDecrypt",
 		"TranslateWrap",
 		"TranslateUnwrap",
+		"Authenticate",
+		"Unrestricted",
+		"FPEEncrypt",
+		"FPEDecrypt",
 	)
+
 	ttlv.RegisterBitmask[StorageStatusMask](
 		TagStorageStatusMask,
 		"OnLineStorage",
 		"ArchivalStorage",
+	)
+
+	ttlv.RegisterBitmask[ProtectionStorageMask](
+		TagProtectionStorageMask,
+		"Software",
+		"Hardware",
+		"OnProcessor",
+		"OnSystem",
+		"OffSystem",
+		"Hypervisor",
+		"OperatingSystem",
+		"Container",
+		"OnPremises",
+		"OffPremises",
+		"SelfManaged",
+		"Outsourced",
+		"Validated",
+		"SameJurisdiction",
 	)
 }
 
@@ -47,46 +71,31 @@ func init() {
 type CryptographicUsageMask int32
 
 const (
-	// CryptographicUsageSign allows the object to be used for signing operations.
 	CryptographicUsageSign CryptographicUsageMask = 1 << iota
-	// CryptographicUsageVerify allows the object to be used for signature verification.
 	CryptographicUsageVerify
-	// CryptographicUsageEncrypt allows the object to be used for encryption.
 	CryptographicUsageEncrypt
-	// CryptographicUsageDecrypt allows the object to be used for decryption.
 	CryptographicUsageDecrypt
-	// CryptographicUsageWrapKey allows the object to be used for key wrapping.
 	CryptographicUsageWrapKey
-	// CryptographicUsageUnwrapKey allows the object to be used for key unwrapping.
 	CryptographicUsageUnwrapKey
-	// CryptographicUsageExport allows the object to be exported.
 	CryptographicUsageExport
-	// CryptographicUsageMACGenerate allows the object to be used for MAC generation.
 	CryptographicUsageMACGenerate
-	// CryptographicUsageMACVerify allows the object to be used for verifying MAC.
 	CryptographicUsageMACVerify
-	// CryptographicUsageDeriveKey allows the object to be used for key derivation.
 	CryptographicUsageDeriveKey
-	// CryptographicUsageContentCommitment allows the object to be used for content commitment (non-repudiation).
 	CryptographicUsageContentCommitment
-	// CryptographicUsageKeyAgreement allows the object to be used for key agreement.
 	CryptographicUsageKeyAgreement
-	// CryptographicUsageCertificateSign allows the object to be used for certificate signing.
 	CryptographicUsageCertificateSign
-	// CryptographicUsageCRLSign allows the object to be used for CRL signing.
 	CryptographicUsageCRLSign
-	// CryptographicUsageGenerateCryptogram allows the object to be used for cryptogram generation.
 	CryptographicUsageGenerateCryptogram
-	// CryptographicUsageValidateCryptogram allows the object to be used for cryptogram validation.
 	CryptographicUsageValidateCryptogram
-	// CryptographicUsageTranslateEncrypt allows the object to be used for translation encryption.
 	CryptographicUsageTranslateEncrypt
-	// CryptographicUsageTranslateDecrypt allows the object to be used for translation decryption.
 	CryptographicUsageTranslateDecrypt
-	// CryptographicUsageTranslateWrap allows the object to be used for translation wrapping.
 	CryptographicUsageTranslateWrap
-	// CryptographicUsageTranslateUnwrap allows the object to be used for translation unwrapping.
 	CryptographicUsageTranslateUnwrap
+	// KMIP 2.0
+	CryptographicUsageAuthenticate
+	CryptographicUsageUnrestricted
+	CryptographicUsageFPEEncrypt
+	CryptographicUsageFPEDecrypt
 )
 
 // MarshalText returns a human-readable string representation of the CryptographicUsageMask.
@@ -110,6 +119,9 @@ const (
 	StorageStatusOnlineStorage StorageStatusMask = 1 << iota
 	// StorageStatusArchivalStorage indicates the object is in archival storage.
 	StorageStatusArchivalStorage
+
+	// KMIP 2.0
+	StorageStatusDestroyedStorage
 )
 
 // MarshalText returns a human-readable string representation of the StorageStatusMask.
@@ -121,6 +133,33 @@ func (mask StorageStatusMask) MarshalText() ([]byte, error) {
 
 func (mask *StorageStatusMask) UnmarshalText(text []byte) error {
 	return maskUnmarshalText(mask, TagStorageStatusMask, string(text))
+}
+
+type ProtectionStorageMask int32
+
+const (
+	ProtectionStorageSoftware ProtectionStorageMask = 1 << iota
+	ProtectionStorageHardware
+	ProtectionStorageOnProcessor
+	ProtectionStorageOnSystem
+	ProtectionStorageOffSystem
+	ProtectionStorageHypervisor
+	ProtectionStorageOperatingSystem
+	ProtectionStorageContainer
+	ProtectionStorageOnPremises
+	ProtectionStorageOffPremises
+	ProtectionStorageSelfManaged
+	ProtectionStorageOutsourced
+	ProtectionStorageValidated
+	ProtectionStorageSameJurisdiction
+)
+
+func (mask ProtectionStorageMask) MarshalText() ([]byte, error) {
+	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
+}
+
+func (mask *ProtectionStorageMask) UnmarshalText(text []byte) error {
+	return maskUnmarshalText(mask, TagProtectionStorageMask, string(text))
 }
 
 func maskUnmarshalText[T ~int32](mask *T, tag int, text string) error {

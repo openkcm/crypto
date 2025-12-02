@@ -14,7 +14,7 @@ import (
 	"github.com/openkcm/crypto/kmip/ttlv"
 )
 
-var defaultSupportedVersion = []kmip.ProtocolVersion{kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
+var defaultSupportedVersion = []kmip.ProtocolVersion{kmip.V2_0, kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
 
 // OperationHandler defines an interface for handling KMIP operations.
 // Implementations of this interface should provide logic to process a specific
