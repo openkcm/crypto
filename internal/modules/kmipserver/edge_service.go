@@ -17,7 +17,7 @@ import (
 	slogctx "github.com/veqryn/slog-context"
 
 	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/internal/kmiphandler"
+	"github.com/openkcm/crypto/internal/core/kmiphandlers"
 	"github.com/openkcm/crypto/kmip/kmipserver"
 	"github.com/openkcm/crypto/pkg/concurrent"
 	"github.com/openkcm/crypto/pkg/module"
@@ -100,7 +100,7 @@ func (s *kmipEdgeServerModule) serveKMIPTCPServer(ctx context.Context) error {
 		return oops.Wrapf(err, "failed to listen on %s", address)
 	}
 
-	handler, err := kmiphandler.NewCryptoEdgeHandler(
+	handler, err := kmiphandlers.NewCryptoEdgeHandler(
 		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
 		s.svcRegistry,
 	)
@@ -116,7 +116,7 @@ func (s *kmipEdgeServerModule) serveKMIPHTTPServer(ctx context.Context) error {
 
 	tlsConfig, _ := commoncfg.LoadMTLSConfig(cfg.TLS)
 
-	handler, err := kmiphandler.NewCryptoEdgeHandler(
+	handler, err := kmiphandlers.NewCryptoEdgeHandler(
 		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
 		s.svcRegistry,
 	)

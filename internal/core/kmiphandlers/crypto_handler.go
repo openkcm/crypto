@@ -1,4 +1,4 @@
-package kmiphandler
+package kmiphandlers
 
 import (
 	"context"
@@ -8,20 +8,20 @@ import (
 	"github.com/openkcm/crypto/kmip"
 )
 
-type CryptoEdgeHandler struct {
+type CryptoHandler struct {
 	svcRegistry core.ServiceRegistry
 	registry    operations.OperationReadRegistry
 }
 
-func NewCryptoEdgeHandler(registry operations.OperationReadRegistry, svcRegistry core.ServiceRegistry) (*CryptoEdgeHandler, error) {
-	return &CryptoEdgeHandler{
+func NewCryptoHandler(registry operations.OperationReadRegistry, svcRegistry core.ServiceRegistry) (*CryptoHandler, error) {
+	return &CryptoHandler{
 		svcRegistry: svcRegistry,
 
 		registry: registry,
 	}, nil
 }
 
-func (h *CryptoEdgeHandler) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {
+func (h *CryptoHandler) HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage {
 	responseItems := []kmip.ResponseBatchItem{}
 	for _, item := range req.BatchItem {
 		respItem := kmip.ResponseBatchItem{
