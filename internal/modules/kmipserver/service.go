@@ -9,7 +9,7 @@ import (
 
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
 	"github.com/openkcm/crypto/internal/core"
-	"github.com/openkcm/crypto/internal/operations"
+	"github.com/openkcm/crypto/internal/core/operations"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

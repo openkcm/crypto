@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/openkcm/crypto/internal/core"
-	"github.com/openkcm/crypto/internal/operations"
+	"github.com/openkcm/crypto/internal/core/operations"
 	"github.com/openkcm/crypto/kmip"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/openkcm/crypto/internal/operations"
+	"github.com/openkcm/crypto/internal/core/operations"
 	"github.com/samber/oops"
 
 	slogctx "github.com/veqryn/slog-context"
@@ -43,17 +43,17 @@ func createStartKMIPTcpServer(ctx context.Context, options ...kmipserver.Option)
 
 func configureRegistry(registry operations.OperationRegistry, cfgOp *config.KMIPOperation) operations.OperationRegistry {
 	if len(cfgOp.Only) > 0 {
-		operations := make([]kmip.Operation, 0, len(cfgOp.Only))
+		kmipOps := make([]kmip.Operation, 0, len(cfgOp.Only))
 		for _, op := range cfgOp.Only {
-			operations = append(operations, kmip.Operation(op))
+			kmipOps = append(kmipOps, kmip.Operation(op))
 		}
-		registry.KeepOnly(operations...)
+		registry.KeepOnly(kmipOps...)
 	} else if len(cfgOp.Exclude) > 0 {
-		operations := make([]kmip.Operation, 0, len(cfgOp.Exclude))
+		kmipOps := make([]kmip.Operation, 0, len(cfgOp.Exclude))
 		for _, op := range cfgOp.Exclude {
-			operations = append(operations, kmip.Operation(op))
+			kmipOps = append(kmipOps, kmip.Operation(op))
 		}
-		registry.Remove(operations...)
+		registry.Remove(kmipOps...)
 	}
 	return registry
 }
