@@ -3,19 +3,19 @@ package kmiphandler
 import (
 	"context"
 
-	"github.com/openkcm/crypto/internal/actions"
-	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/core"
+	"github.com/openkcm/crypto/internal/operations"
 	"github.com/openkcm/crypto/kmip"
 )
 
 type CryptoHandler struct {
-	config   *config.Config
-	registry actions.ReadRegistry
+	svcRegistry core.ServiceRegistry
+	registry    operations.OperationReadRegistry
 }
 
-func NewCryptoHandler(registry actions.ReadRegistry, config *config.Config) (*CryptoHandler, error) {
+func NewCryptoHandler(registry operations.OperationReadRegistry, svcRegistry core.ServiceRegistry) (*CryptoHandler, error) {
 	return &CryptoHandler{
-		config: config,
+		svcRegistry: svcRegistry,
 
 		registry: registry,
 	}, nil
@@ -30,14 +30,14 @@ func (h *CryptoHandler) HandleRequest(ctx context.Context, req *kmip.RequestMess
 			ResultStatus:      kmip.ResultStatusSuccess,
 		}
 
-		action := h.registry.Lookup(item.Operation)
-		if action == nil {
+		op := h.registry.Lookup(item.Operation)
+		if op == nil {
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonOperationNotSupported
 			responseItems = append(responseItems, respItem)
 			continue
 		}
-		result, err := action.Execute(ctx)
+		result, err := op.Execute(ctx, h.svcRegistry)
 		if err != nil {
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonIllegalOperation

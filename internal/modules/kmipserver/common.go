@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/openkcm/crypto/internal/operations"
 	"github.com/samber/oops"
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/internal/actions"
 	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/kmip"
 	"github.com/openkcm/crypto/kmip/kmipserver"
@@ -41,7 +41,7 @@ func createStartKMIPTcpServer(ctx context.Context, options ...kmipserver.Option)
 	return nil
 }
 
-func configureRegistry(registry actions.Registry, cfgOp *config.KMIPOperation) actions.Registry {
+func configureRegistry(registry operations.OperationRegistry, cfgOp *config.KMIPOperation) operations.OperationRegistry {
 	if len(cfgOp.Only) > 0 {
 		operations := make([]kmip.Operation, 0, len(cfgOp.Only))
 		for _, op := range cfgOp.Only {
