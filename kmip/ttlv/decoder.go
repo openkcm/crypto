@@ -24,6 +24,7 @@ type reader interface {
 	ByteString(tag int) ([]byte, error)
 	DateTime(tag int) (time.Time, error)
 	Interval(tag int) (time.Duration, error)
+	DateTimeExtended(tag int) (time.Time, error)
 	Bitmask(realtag, tag int) (int32, error)
 }
 
@@ -151,6 +152,11 @@ func (dec *Decoder) DateTime(tag int) (time.Time, error) {
 // DateTime reads a duration and advance to the next value.
 func (dec *Decoder) Interval(tag int) (time.Duration, error) {
 	return dec.r.Interval(tag)
+}
+
+// DateTimeExtended reads a date-time and advance to the next value.
+func (dec *Decoder) DateTimeExtended(tag int) (time.Time, error) {
+	return dec.r.DateTime(tag)
 }
 
 // Bitmaks reads a bitmask value from the internal buffer.

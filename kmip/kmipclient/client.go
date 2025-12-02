@@ -56,7 +56,7 @@ import (
 	"github.com/openkcm/crypto/kmip/ttlv"
 )
 
-var supportedVersions = []kmip.ProtocolVersion{kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
+var supportedVersions = []kmip.ProtocolVersion{kmip.V2_0, kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
 
 type opts struct {
 	middlewares       []Middleware

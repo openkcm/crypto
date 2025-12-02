@@ -184,6 +184,15 @@ func (j *jsonWriter) Interval(tag int, interval time.Duration) {
 	})
 }
 
+// DateTimeExtended implements writer.
+func (j *jsonWriter) DateTimeExtended(tag int, date time.Time) {
+	j.encodeAppend(TypeDateTimeExtended, tag, func(b []byte) []byte {
+		b = append(b, '"')
+		b = date.AppendFormat(b, time.RFC3339)
+		return append(b, '"')
+	})
+}
+
 // Struct implements writer.
 func (j *jsonWriter) Struct(tag int, f func(writer)) {
 	j.startElem(TypeStructure, tag)
@@ -487,31 +496,7 @@ func (j *jsonReader) ByteString(tag int) ([]byte, error) {
 
 // DateTime implements reader.
 func (j *jsonReader) DateTime(tag int) (time.Time, error) {
-	if err := j.assertType(TypeDateTime, tag); err != nil {
-		return time.Time{}, err
-	}
-	switch val := j.getValue().(type) {
-	case string:
-		if strings.HasPrefix(val, "0x") {
-			parsed, err := strconv.ParseUint(val[2:], 10, 64)
-			if err != nil {
-				return time.Time{}, err
-			}
-			//nolint:gosec // this cast is safe as we are parsing an 64 bits hex value
-			epoch := int64(parsed)
-			if epoch < 0 {
-				return time.Time{}, Errorf("date-time cannot be negative")
-			}
-			return time.Unix(epoch, 0).UTC(), j.Next()
-		}
-		t, err := time.Parse(time.RFC3339, val)
-		if err != nil {
-			return t, err
-		}
-		return t.Local(), j.Next()
-	default:
-		return time.Time{}, Errorf("invalid date-time value: %q", val)
-	}
+	return j.genericDateTime(TypeDateTime, tag)
 }
 
 // Interval implements reader.
@@ -539,6 +524,11 @@ func (j *jsonReader) Interval(tag int) (time.Duration, error) {
 	default:
 		return 0, Errorf("Invalid interval value %q", val)
 	}
+}
+
+// DateTimeExtended implements reader.
+func (j *jsonReader) DateTimeExtended(tag int) (time.Time, error) {
+	return j.genericDateTime(TypeDateTimeExtended, tag)
 }
 
 // Struct implements reader.
@@ -601,5 +591,34 @@ func (j *jsonReader) Bitmask(realtag, tag int) (int32, error) {
 		return result, j.Next()
 	default:
 		return 0, Errorf("Invalid bitmask value %q", val)
+	}
+}
+
+// genericDateTime implements DateTime reader.
+func (j *jsonReader) genericDateTime(ty Type, tag int) (time.Time, error) {
+	if err := j.assertType(ty, tag); err != nil {
+		return time.Time{}, err
+	}
+	switch val := j.getValue().(type) {
+	case string:
+		if strings.HasPrefix(val, "0x") {
+			parsed, err := strconv.ParseUint(val[2:], 10, 64)
+			if err != nil {
+				return time.Time{}, err
+			}
+			//nolint:gosec // this cast is safe as we are parsing an 64 bits hex value
+			epoch := int64(parsed)
+			if epoch < 0 {
+				return time.Time{}, Errorf("date-time cannot be negative")
+			}
+			return time.Unix(epoch, 0).UTC(), j.Next()
+		}
+		t, err := time.Parse(time.RFC3339, val)
+		if err != nil {
+			return t, err
+		}
+		return t.Local(), j.Next()
+	default:
+		return time.Time{}, Errorf("invalid date-time value: %q", val)
 	}
 }

@@ -24,15 +24,20 @@ func (pv ProtocolVersion) String() string {
 }
 
 type CredentialValue struct {
-	UserPassword *CredentialValueUserPassword
-	Device       *CredentialValueDevice
-	Attestation  *CredentialValueAttestation
+	UserPassword    *CredentialValueUserPassword
+	Device          *CredentialValueDevice
+	Attestation     *CredentialValueAttestation
+	OneTimePassword *CredentialValueOneTimePassword
+	HashedPassword  *CredentialValueHashedPassword
+	Ticket          *CredentialValueTicket
 }
 
 func (cred *CredentialValue) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 	e.TagAny(tag, cred.UserPassword)
 	e.TagAny(tag, cred.Device)
 	e.TagAny(tag, cred.Attestation)
+	e.TagAny(tag, cred.OneTimePassword)
+	e.TagAny(tag, cred.Ticket)
 }
 
 func (cred *CredentialValue) decode(d *ttlv.Decoder, tag int, cType CredentialType) error {
@@ -43,6 +48,12 @@ func (cred *CredentialValue) decode(d *ttlv.Decoder, tag int, cType CredentialTy
 		return d.TagAny(tag, &cred.Device)
 	case CredentialTypeAttestation:
 		return d.TagAny(tag, &cred.Attestation)
+	case CredentialTypeOneTimePassword:
+		return d.TagAny(tag, &cred.OneTimePassword)
+	case CredentialTypeHashedPassword:
+		return d.TagAny(tag, &cred.HashedPassword)
+	case CredentialTypeTicket:
+		return d.TagAny(tag, &cred.Ticket)
 	}
 	return fmt.Errorf("Unsupported credential type %X", cType)
 }
@@ -66,6 +77,15 @@ type CredentialValueAttestation struct {
 	AttestationType        AttestationType
 	AttestationMeasurement []byte `ttlv:",omitempty"`
 	AttestationAssertion   []byte `ttlv:",omitempty"`
+}
+
+type CredentialValueOneTimePassword struct {
+}
+
+type CredentialValueHashedPassword struct {
+}
+
+type CredentialValueTicket struct {
 }
 
 type Credential struct {
@@ -266,4 +286,48 @@ type CapabilityInformation struct {
 	DestroyAction           DestroyAction      `ttlv:",omitempty"`
 	ShreddingAlgorithm      ShreddingAlgorithm `ttlv:",omitempty"`
 	RNGMode                 RNGMode            `ttlv:",omitempty"`
+}
+
+type CertificateAttributes struct {
+	CertificateSubjectCN           string `ttlv:",omitempty"`
+	CertificateSubjectO            string `ttlv:",omitempty"`
+	CertificateSubjectOU           string `ttlv:",omitempty"`
+	CertificateSubjectEmail        string `ttlv:",omitempty"`
+	CertificateSubjectC            string `ttlv:",omitempty"`
+	CertificateSubjectST           string `ttlv:",omitempty"`
+	CertificateSubjectL            string `ttlv:",omitempty"`
+	CertificateSubjectUID          string `ttlv:",omitempty"`
+	CertificateSubjectSerialNumber string `ttlv:",omitempty"`
+	CertificateSubjectTitle        string `ttlv:",omitempty"`
+	CertificateSubjectDC           string `ttlv:",omitempty"`
+	CertificateSubjectDNQualifier  string `ttlv:",omitempty"`
+	CertificateIssuerCN            string `ttlv:",omitempty"`
+	CertificateIssuerO             string `ttlv:",omitempty"`
+	CertificateIssuerOU            string `ttlv:",omitempty"`
+	CertificateIssuerEmail         string `ttlv:",omitempty"`
+	CertificateIssuerC             string `ttlv:",omitempty"`
+	CertificateIssuerST            string `ttlv:",omitempty"`
+	CertificateIssuerL             string `ttlv:",omitempty"`
+	CertificateIssuerUID           string `ttlv:",omitempty"`
+	CertificateIssuerSerialNumber  string `ttlv:",omitempty"`
+	CertificateIssuerTitle         string `ttlv:",omitempty"`
+	CertificateIssuerDC            string `ttlv:",omitempty"`
+	CertificateIssuerDNQualifier   string `ttlv:",omitempty"`
+}
+
+type VendorAttribute struct {
+	VendorIdentification string `ttlv:",omitempty"`
+	AttributeName        string `ttlv:",omitempty"`
+	AttributeValue       any    `ttlv:",omitempty"`
+}
+
+type Right struct {
+	UsageLimits *UsageLimits `ttlv:",omitempty"`
+	Operations  []Operation  `ttlv:",omitempty"`
+	Objects     []Object     `ttlv:",omitempty"`
+}
+
+type Ticket struct {
+	TicketType  TicketType `ttlv:",omitempty"`
+	TicketValue []byte     `ttlv:",omitempty"`
 }
