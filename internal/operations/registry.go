@@ -1,4 +1,4 @@
-package actions
+package operations
 
 import (
 	"maps"
@@ -8,23 +8,23 @@ import (
 )
 
 var (
-	registeredActions = map[kmip.Operation]Action{}
+	registeredActions = map[kmip.Operation]Operation{}
 )
 
 func init() {
-	Register(&createAction{})
+	RegisterAction(&createAction{})
 }
 
-func Register(action Action) {
+func RegisterAction(action Operation) {
 	registeredActions[action.Operation()] = action
 }
 
-type ReadRegistry interface {
-	Lookup(operation kmip.Operation) Action
+type OperationReadRegistry interface {
+	Lookup(operation kmip.Operation) Operation
 }
 
-type Registry interface {
-	ReadRegistry
+type OperationRegistry interface {
+	OperationReadRegistry
 
 	Add(operations ...kmip.Operation)
 	Remove(operations ...kmip.Operation)
@@ -33,11 +33,11 @@ type Registry interface {
 
 type registry struct {
 	mu      sync.RWMutex
-	actions map[kmip.Operation]Action
+	actions map[kmip.Operation]Operation
 }
 
-func NewRegistry() Registry {
-	tmp := make(map[kmip.Operation]Action)
+func NewRegistry() OperationRegistry {
+	tmp := make(map[kmip.Operation]Operation)
 
 	maps.Copy(tmp, registeredActions)
 	return &registry{
@@ -83,7 +83,7 @@ func (r *registry) KeepOnly(operations ...kmip.Operation) {
 	}
 }
 
-func (r *registry) Lookup(operation kmip.Operation) Action {
+func (r *registry) Lookup(operation kmip.Operation) Operation {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

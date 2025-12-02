@@ -41,7 +41,7 @@ func createStartKMIPTcpServer(ctx context.Context, options ...kmipserver.Option)
 	return nil
 }
 
-func configureRegistry(registry actions.Registry, cfgOp *config.KMIPOperation) actions.Registry {
+func configureRegistry(registry operations.ActionRegistry, cfgOp *config.KMIPOperation) operations.ActionRegistry {
 	if len(cfgOp.Only) > 0 {
 		operations := make([]kmip.Operation, 0, len(cfgOp.Only))
 		for _, op := range cfgOp.Only {

@@ -3,19 +3,19 @@ package kmiphandler
 import (
 	"context"
 
-	"github.com/openkcm/crypto/internal/actions"
-	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/crypto/internal/core"
+	"github.com/openkcm/crypto/internal/operations"
 	"github.com/openkcm/crypto/kmip"
 )
 
 type CryptoEdgeHandler struct {
-	config   *config.Config
-	registry actions.ReadRegistry
+	svcRegistry core.ServiceRegistry
+	registry    operations.OperationReadRegistry
 }
 
-func NewCryptoEdgeHandler(registry actions.ReadRegistry, config *config.Config) (*CryptoEdgeHandler, error) {
+func NewCryptoEdgeHandler(registry operations.OperationReadRegistry, svcRegistry core.ServiceRegistry) (*CryptoEdgeHandler, error) {
 	return &CryptoEdgeHandler{
-		config: config,
+		svcRegistry: svcRegistry,
 
 		registry: registry,
 	}, nil
@@ -30,14 +30,14 @@ func (h *CryptoEdgeHandler) HandleRequest(ctx context.Context, req *kmip.Request
 			ResultStatus:      kmip.ResultStatusSuccess,
 		}
 
-		action := h.registry.Lookup(item.Operation)
-		if action == nil {
+		op := h.registry.Lookup(item.Operation)
+		if op == nil {
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonOperationNotSupported
 			responseItems = append(responseItems, respItem)
 			continue
 		}
-		result, err := action.Execute(ctx)
+		result, err := op.Execute(ctx, h.svcRegistry)
 		if err != nil {
 			respItem.ResultStatus = kmip.ResultStatusOperationFailed
 			respItem.ResultReason = kmip.ResultReasonIllegalOperation

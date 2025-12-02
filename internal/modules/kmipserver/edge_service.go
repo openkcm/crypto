@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
+	"github.com/openkcm/crypto/internal/cryptocore"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -29,7 +30,8 @@ const (
 
 // kmipEdgeServerModule implements module.EmbeddedModule interface.
 type kmipEdgeServerModule struct {
-	config *config.Config
+	config      *config.Config
+	svcRegistry core.ServiceRegistry
 
 	fs *pflag.FlagSet
 }
@@ -47,6 +49,7 @@ func (s *kmipEdgeServerModule) Name() string { return moduleCryptoEdgeName }
 func (s *kmipEdgeServerModule) Init(cfg any, serveCmd *cobra.Command) error {
 	//nolint: forcetypeassert
 	s.config = cfg.(*config.Config)
+	s.svcRegistry = core.NewServiceRegistry(s.config)
 
 	s.fs = serveCmd.Flags()
 	return s.validate()
@@ -98,8 +101,8 @@ func (s *kmipEdgeServerModule) serveKMIPTCPServer(ctx context.Context) error {
 	}
 
 	handler, err := kmiphandler.NewCryptoEdgeHandler(
-		configureRegistry(actions.NewRegistry(), &cfg.KMIPOperation),
-		s.config,
+		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
+		s.svcRegistry,
 	)
 	if err != nil {
 		return oops.Wrapf(err, "failed to create handler")
@@ -114,8 +117,8 @@ func (s *kmipEdgeServerModule) serveKMIPHTTPServer(ctx context.Context) error {
 	tlsConfig, _ := commoncfg.LoadMTLSConfig(cfg.TLS)
 
 	handler, err := kmiphandler.NewCryptoEdgeHandler(
-		configureRegistry(actions.NewRegistry(), &cfg.KMIPOperation),
-		s.config,
+		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
+		s.svcRegistry,
 	)
 	if err != nil {
 		return oops.Wrapf(err, "failed to create handler")
