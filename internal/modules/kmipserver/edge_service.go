@@ -8,14 +8,14 @@ import (
 	"net/http"
 
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
-	"github.com/openkcm/crypto/internal/cryptocore"
+	"github.com/openkcm/crypto/internal/core"
+	"github.com/openkcm/crypto/internal/operations"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/internal/actions"
 	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/internal/kmiphandler"
 	"github.com/openkcm/crypto/kmip/kmipserver"
