@@ -8,15 +8,15 @@ import (
 	"github.com/openkcm/crypto/kmip/payloads"
 )
 
-type createAction struct {
+type create struct {
 }
 
-var _ Operation = (*createAction)(nil)
+var _ Operation = (*create)(nil)
 
-func (c *createAction) Operation() kmip.Operation {
+func (c *create) Operation() kmip.Operation {
 	return kmip.OperationCreate
 }
 
-func (c *createAction) Execute(ctx context.Context, serviceRegistry core.ServiceRegistry) (kmip.OperationPayload, error) {
+func (c *create) Execute(ctx context.Context, serviceRegistry core.ServiceRegistry) (kmip.OperationPayload, error) {
 	return &payloads.CreateResponsePayload{}, nil
 }

@@ -12,7 +12,7 @@ var (
 )
 
 func init() {
-	RegisterAction(&createAction{})
+	RegisterAction(&create{})
 }
 
 func RegisterAction(action Operation) {

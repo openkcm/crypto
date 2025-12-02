@@ -3,6 +3,7 @@ package kmiphandlers
 import (
 	"context"
 
+	"github.com/openkcm/crypto/internal/config"
 	"github.com/openkcm/crypto/internal/core"
 	"github.com/openkcm/crypto/internal/core/operations"
 	"github.com/openkcm/crypto/kmip"
@@ -13,9 +14,9 @@ type CryptoEdgeHandler struct {
 	registry    operations.OperationReadRegistry
 }
 
-func NewCryptoEdgeHandler(registry operations.OperationReadRegistry, svcRegistry core.ServiceRegistry) (*CryptoEdgeHandler, error) {
+func NewCryptoEdgeHandler(registry operations.OperationReadRegistry, cfg *config.Config) (*CryptoEdgeHandler, error) {
 	return &CryptoEdgeHandler{
-		svcRegistry: svcRegistry,
+		svcRegistry: core.NewServiceRegistry(cfg),
 
 		registry: registry,
 	}, nil
