@@ -48,8 +48,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/oklog/ulid/v2 v2.1.1 h1:suPZ4ARWLOJLegGFiZZ1dFAkqzhMjL3J1TzI+5wHz8s=
 github.com/oklog/ulid/v2 v2.1.1/go.mod h1:rcEKHmBBKfef9DhnvX7y1HZBYxjXb0cP5ExxNsTT1QQ=
-github.com/openkcm/common-sdk v1.6.2 h1:RQeWGXWKQXNv6/popujjwco9tCEwqmqwuqi9Obq5pQ4=
-github.com/openkcm/common-sdk v1.6.2/go.mod h1:U4AbaqwRwcx8wwq1ucDi9Yb3+ejQu8kcTepGfybo5hE=
+github.com/openkcm/common-sdk v1.8.0 h1:sagP8W7HBLShr9eaRQvHCKxqklwrpVD7+0Ka7c01hGA=
+github.com/openkcm/common-sdk v1.8.0/go.mod h1:K9B0cFYBNq+ORyi9IfXiuWQSuRBC1Jto/57vISnqCXY=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
