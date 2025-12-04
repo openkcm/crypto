@@ -63,7 +63,7 @@ type connConfig struct {
 func newConn(ctx context.Context, netCfg *connConfig) *conn {
 	ctx, cancel := context.WithCancelCause(ctx)
 	c := &conn{
-		stream: ttlv.NewStream(netCfg.netCon, netCfg.streamMaxSize*1024*1024), // Max Size is 1 MB
+		stream: ttlv.NewStream(netCfg.netCon, netCfg.streamMaxSize),
 		tx:     atomic.Value{},
 		rx:     make(chan rxMsg),
 		ctx:    ctx,

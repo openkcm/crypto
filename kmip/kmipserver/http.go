@@ -11,7 +11,28 @@ import (
 	"github.com/openkcm/crypto/kmip/ttlv"
 )
 
-const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
+type httpHandler struct {
+	inner       RequestHandler
+	maxBodySize int
+}
+
+type HttpHandlerOption func(*httpHandler)
+
+func WithHTTPMaxBodySize(maxBodySize int) HttpHandlerOption {
+	return func(req *httpHandler) {
+		if maxBodySize < DEFAULT_MAX_BODY_SIZE {
+			maxBodySize = DEFAULT_MAX_BODY_SIZE
+		}
+
+		req.maxBodySize = maxBodySize
+	}
+}
+
+func WithRequestHandler(hdl RequestHandler) HttpHandlerOption {
+	return func(req *httpHandler) {
+		req.inner = hdl
+	}
+}
 
 // NewHTTPHandler creates a new HTTP handler that wraps the provided RequestHandler.
 // It returns an http.Handler that can be used to serve HTTP requests using the given handler logic.
@@ -24,12 +45,12 @@ const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
 // back. Only POST requests are allowed; other methods receive a 405 Method Not Allowed response.
 // Unsupported Content-Type headers result in a 406 Not Acceptable response, and requests with
 // invalid or missing Content-Length headers receive a 411 Length Required response.
-func NewHTTPHandler(hdl RequestHandler) http.Handler {
-	return httpHandler{inner: hdl}
-}
-
-type httpHandler struct {
-	inner RequestHandler
+func NewHTTPHandler(opts ...HttpHandlerOption) http.Handler {
+	handler := &httpHandler{maxBodySize: DEFAULT_MAX_BODY_SIZE}
+	for _, opt := range opts {
+		opt(handler)
+	}
+	return handler
 }
 
 // ServeHTTP handles incoming HTTP requests for the KMIP server. It supports POST requests with
@@ -52,23 +73,25 @@ func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	var unmarshaller func(data []byte, ptr any) error
 	var marshaller func(data any) []byte
-	switch req.Header.Get("Content-Type") {
-	case "text/xml":
+
+	contentType := req.Header.Get("Content-Type")
+	switch contentType {
+	case "text/xml", "application/vnd.kmip+xml":
 		unmarshaller = ttlv.UnmarshalXML
 		marshaller = ttlv.MarshalXML
-	case "application/json":
+	case "application/json", "application/vnd.kmip+json":
 		unmarshaller = ttlv.UnmarshalJSON
 		marshaller = ttlv.MarshalJSON
-	case "application/octet-stream":
+	case "application/octet-stream", "application/vnd.kmip+ttl":
 		unmarshaller = ttlv.UnmarshalTTLV
 		marshaller = ttlv.MarshalTTLV
 	default:
-		rw.WriteHeader(http.StatusNotAcceptable)
+		rw.WriteHeader(http.StatusUnsupportedMediaType)
 		_, _ = io.WriteString(rw, "Unsupported Content-Type header")
 		return
 	}
 
-	//TODO: Check the Accept header if present
+	rw.Header().Set("Accept", contentType)
 
 	contentLen, err := strconv.Atoi(req.Header.Get("Content-Length"))
 	if err != nil || contentLen <= 0 {
@@ -94,7 +117,7 @@ func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		// If encoding error, send back the kmip error response
 		resp = hdl.handleError(req.Context(), err, &msg)
 	} else {
-		ctx := newConnContext(req.Context(), req.RemoteAddr, req.TLS)
+		ctx := newConnContext(req.Context(), req.RemoteAddr, req.TLS, req.Header)
 		resp = hdl.inner.HandleRequest(ctx, &msg)
 	}
 

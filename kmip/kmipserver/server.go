@@ -54,11 +54,12 @@ type Server struct {
 
 	wg *sync.WaitGroup
 
-	onConnect ConnectHook
-	onClose   TerminateHook
+	onConnect   ConnectHook
+	onClose     TerminateHook
+	maxBodySize int
 }
 
-type Option func(*Server) error
+type Option func(*Server)
 
 // WithConnectHook sets the connect hook for the server, which is called when a new connection is established.
 // This hook can be used to modify the context for the connection.
@@ -69,9 +70,8 @@ type Option func(*Server) error
 // Returns:
 //   - The Server instance with the connect hook set.
 func WithConnectHook(hook ConnectHook) Option {
-	return func(s *Server) error {
+	return func(s *Server) {
 		s.onConnect = hook
-		return nil
 	}
 }
 
@@ -84,23 +84,30 @@ func WithConnectHook(hook ConnectHook) Option {
 // Returns:
 //   - The Server instance with the terminate hook set.
 func WithTerminateHook(hook TerminateHook) Option {
-	return func(s *Server) error {
+	return func(s *Server) {
 		s.onClose = hook
-		return nil
+	}
+}
+
+func WithTCPMaxBodySize(maxBodySize int) Option {
+	return func(req *Server) {
+		if maxBodySize < DEFAULT_MAX_BODY_SIZE {
+			maxBodySize = DEFAULT_MAX_BODY_SIZE
+		}
+
+		req.maxBodySize = maxBodySize
 	}
 }
 
 func WithHandler(handler RequestHandler) Option {
-	return func(s *Server) error {
+	return func(s *Server) {
 		s.handler = handler
-		return nil
 	}
 }
 
 func WithListener(listener net.Listener) Option {
-	return func(s *Server) error {
+	return func(s *Server) {
 		s.listener = listener
-		return nil
 	}
 }
 
@@ -130,17 +137,16 @@ func NewServer(ctx context.Context, options ...Option) (*Server, error) {
 	recvCtx, recvCancel := context.WithCancel(rootCtx)
 
 	srv := &Server{
-		ctx:        rootCtx,
-		cancel:     cancel,
-		recvCtx:    recvCtx,
-		recvCancel: recvCancel,
-		wg:         &sync.WaitGroup{},
+		ctx:         rootCtx,
+		cancel:      cancel,
+		recvCtx:     recvCtx,
+		recvCancel:  recvCancel,
+		wg:          &sync.WaitGroup{},
+		maxBodySize: DEFAULT_MAX_BODY_SIZE,
 	}
 
 	for _, opt := range options {
-		if err := opt(srv); err != nil {
-			return nil, err
-		}
+		opt(srv)
 	}
 
 	if err := srv.validate(); err != nil {
@@ -214,13 +220,13 @@ func (srv *Server) handleConn(conn net.Conn) {
 
 	stream := newConn(srv.ctx, &connConfig{
 		netCon:        conn,
-		streamMaxSize: 15,
+		streamMaxSize: srv.maxBodySize,
 		logger:        logger,
 	})
 	defer stream.Close()
 
 	// Per-connection context
-	ctx := newConnContext(stream.ctx, conn.RemoteAddr().String(), tlsState)
+	ctx := newConnContext(stream.ctx, conn.RemoteAddr().String(), tlsState, nil)
 
 	ctx, err := srv.connectHook(ctx)
 	if err != nil {

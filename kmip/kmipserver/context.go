@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"net/http"
 
 	"github.com/openkcm/crypto/kmip"
 )
@@ -13,12 +14,14 @@ type ctxConn struct{}
 
 type connData struct {
 	remoteAddr   string
+	headers      http.Header
 	tlsConnState *tls.ConnectionState
 }
 
-func newConnContext(parent context.Context, remoteAddr string, tlsConnState *tls.ConnectionState) context.Context {
+func newConnContext(parent context.Context, remoteAddr string, tlsConnState *tls.ConnectionState, headers http.Header) context.Context {
 	data := connData{
 		remoteAddr:   remoteAddr,
+		headers:      headers,
 		tlsConnState: tlsConnState,
 	}
 	return context.WithValue(parent, ctxConn{}, data)
@@ -44,6 +47,16 @@ func PeerCertificates(ctx context.Context) []*x509.Certificate {
 		return nil
 	}
 	return v.tlsConnState.PeerCertificates
+}
+
+// RequestHeaders retrieves the headers coming through http request.
+// For non http requests, it returns nil.
+func RequestHeaders(ctx context.Context) map[string][]string {
+	v, _ := ctx.Value(ctxConn{}).(connData)
+	if len(v.headers) == 0 {
+		return nil
+	}
+	return v.headers
 }
 
 type ctxBatch struct{}

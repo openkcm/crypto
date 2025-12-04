@@ -17,8 +17,19 @@ type Config struct {
 
 // KMIPServer describes configuration for KMIP over TCP and HTTP endpoints.
 type KMIPServer struct {
-	TCP  KMIPTCP  `yaml:"tcp" json:"tcp"`
-	HTTP KMIPHTTP `yaml:"http" json:"http"`
+	TCP  KMIPTCP  `mapstructure:"tcp" yaml:"tcp" json:"tcp"`
+	HTTP KMIPHTTP `mapstructure:"http" yaml:"http" json:"http"`
+
+	Proxy *KMIPProxy `mapstructure:"proxy" yaml:"proxy" json:"proxy"`
+}
+
+type KMIPProxy struct {
+	Endpoint string `mapstructure:"endpoint" yaml:"endpoint" json:"endpoint"`
+
+	// TLS contains the mTLS configuration (certificates, CA, keys)
+	// used to secure KMIP-over-TCP. If nil, the server operates
+	// in plaintext mode (not recommended for production).
+	TLS *commoncfg.MTLS `yaml:"tls" json:"tls"`
 }
 
 // KMIPOperation defines filtering rules that control which KMIP operations
@@ -33,7 +44,6 @@ type KMIPServer struct {
 // Operation codes use KMIP numerical identifiers,
 // e.g., 0x00000001 (Create), 0x00000002 (Destroy), etc.
 type KMIPOperation struct {
-
 	// Exclude lists KMIP operation codes that must be explicitly blocked.
 	// Ignored if Only list is non-empty.
 	Exclude []uint32 `mapstructure:"exclude"  yaml:"exclude" json:"exclude"`
