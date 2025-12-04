@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
+	"github.com/openkcm/crypto/internal/core"
+	"github.com/openkcm/crypto/internal/core/authorization"
 	"github.com/openkcm/crypto/internal/core/kmiphandlers"
 	"github.com/openkcm/crypto/internal/core/operations"
 	"github.com/samber/oops"
@@ -97,9 +99,18 @@ func (s *kmipCryptoServerModule) serveKMIPTCPServer(ctx context.Context) error {
 		return oops.Wrapf(err, "failed to listen on %s", address)
 	}
 
+	var proxyHttpKMIP *kmiphandlers.HttpKMIP
+	if s.config.KMIPServer.Proxy != nil {
+		proxyHttpKMIP = &kmiphandlers.HttpKMIP{
+			Endpoint: s.config.KMIPServer.Proxy.Endpoint,
+		}
+	}
+
 	handler, err := kmiphandlers.NewCryptoHandler(
 		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
-		s.config,
+		core.NewServiceRegistry(s.config),
+		authorization.NewCertificateAuthorizationHandler(s.config),
+		proxyHttpKMIP,
 	)
 	if err != nil {
 		return oops.Wrapf(err, "failed to create handler")
@@ -113,16 +124,28 @@ func (s *kmipCryptoServerModule) serveKMIPHTTPServer(ctx context.Context) error 
 
 	tlsConfig, _ := commoncfg.LoadMTLSConfig(cfg.TLS)
 
+	var proxyHttpKMIP *kmiphandlers.HttpKMIP
+	if s.config.KMIPServer.Proxy != nil {
+		proxyHttpKMIP = &kmiphandlers.HttpKMIP{
+			Endpoint: s.config.KMIPServer.Proxy.Endpoint,
+		}
+	}
+
 	handler, err := kmiphandlers.NewCryptoHandler(
 		configureRegistry(operations.NewRegistry(), &cfg.KMIPOperation),
-		s.config,
+		core.NewServiceRegistry(s.config),
+		authorization.NewCertificateAuthorizationHandler(s.config),
+		proxyHttpKMIP,
 	)
 	if err != nil {
 		return oops.Wrapf(err, "failed to create handler")
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle(cfg.BasePath, kmipserver.NewHTTPHandler(handler))
+	mux.Handle(cfg.BasePath, kmipserver.NewHTTPHandler(
+		kmipserver.WithHTTPMaxBodySize(15*1024*1024),
+		kmipserver.WithRequestHandler(handler)),
+	)
 
 	slogctx.Info(ctx, "Starting KMIP HTTP server")
 	err = serve.HTTP(ctx, &http.Server{

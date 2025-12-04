@@ -25,7 +25,7 @@ func TestHttpHandler_TTLV(t *testing.T) {
 		return &payloads.ActivateResponsePayload{UniqueIdentifier: req.UniqueIdentifier}, nil
 	}))
 
-	hdl := kmipserver.NewHTTPHandler(mux)
+	hdl := kmipserver.NewHTTPHandler(kmipserver.WithRequestHandler(mux))
 
 	for _, tc := range []struct {
 		name      string
