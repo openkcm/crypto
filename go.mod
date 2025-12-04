@@ -3,7 +3,7 @@ module github.com/openkcm/crypto
 go 1.25.4
 
 require (
-	github.com/openkcm/common-sdk v1.6.2
+	github.com/openkcm/common-sdk v1.8.0
 	github.com/samber/oops v1.19.4
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
