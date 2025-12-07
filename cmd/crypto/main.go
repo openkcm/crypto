@@ -8,6 +8,7 @@ import (
 
 	"github.com/openkcm/common-sdk/pkg/logger"
 	"github.com/openkcm/common-sdk/pkg/otlp"
+	"github.com/openkcm/crypto/internal/modules/status"
 	"github.com/spf13/cobra"
 
 	slogctx "github.com/veqryn/slog-context"
@@ -28,6 +29,7 @@ var (
 var (
 	serveModules = []module.EmbeddedModule{
 		kmipserver.NewCrypto(),
+		status.New(),
 	}
 	migrateModules = []module.EmbeddedModule{
 		dbmigrate.New(),

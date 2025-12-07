@@ -1,4 +1,4 @@
-package dbmigrate
+package status
 
 import (
 	"context"
