@@ -26,7 +26,6 @@ func NewCertificateAuthorizationHandler(cfg *config.Config) AuthorizationHandler
 
 func (req *certificateRequest) Check() *CheckResponse {
 	return &CheckResponse{
-		PerOperation: map[kmip.Operation]bool{},
-		Result:       false,
+		perOperation: map[kmip.Operation]bool{},
 	}
 }

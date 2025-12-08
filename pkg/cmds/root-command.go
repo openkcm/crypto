@@ -46,7 +46,7 @@ func SetupRootCommand(rootCmd *cobra.Command, cfg *config.Config, modules map[*c
 	rootCmd.PersistentFlags().Int64Var(&startupTimeoutSec, "startup-timeout", 30,
 		"startup timeout seconds",
 	)
-	rootCmd.PersistentFlags().Int64Var(&gracefulShutdownSec, "graceful-shutdown", 1,
+	rootCmd.PersistentFlags().Int64Var(&gracefulShutdownSec, "graceful-shutdown", 5,
 		"graceful shutdown seconds",
 	)
 	rootCmd.PersistentFlags().StringVar(&gracefulShutdownMessage, "graceful-shutdown-message",

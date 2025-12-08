@@ -16,6 +16,7 @@ import (
 	"github.com/openkcm/crypto/internal/config"
 	dbmigrate "github.com/openkcm/crypto/internal/modules/db-migrate"
 	"github.com/openkcm/crypto/internal/modules/kmipserver"
+	"github.com/openkcm/crypto/internal/modules/status"
 	"github.com/openkcm/crypto/pkg/cmds"
 	"github.com/openkcm/crypto/pkg/module"
 )
@@ -28,6 +29,7 @@ var (
 var (
 	serveModules = []module.EmbeddedModule{
 		kmipserver.NewCrypto(),
+		status.New(),
 	}
 	migrateModules = []module.EmbeddedModule{
 		dbmigrate.New(),
