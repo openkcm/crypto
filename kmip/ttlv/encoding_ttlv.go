@@ -149,6 +149,13 @@ func (enc *ttlvWriter) Interval(tag int, interval time.Duration) {
 	})
 }
 
+func (enc *ttlvWriter) DateTimeExtended(tag int, date time.Time) {
+	enc.encodeAppend(tag, TypeDateTimeExtended, 8, func(b []byte) []byte {
+		//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
+		return binary.BigEndian.AppendUint64(b, uint64(date.Unix()))
+	})
+}
+
 func (enc *ttlvWriter) Bitmask(bitmasktag, tag int, value int32) {
 	enc.Integer(tag, value)
 }
@@ -318,6 +325,15 @@ func (dec *ttlvReader) Interval(tag int) (time.Duration, error) {
 		return 0, err
 	}
 	v := time.Duration(binary.BigEndian.Uint32(dec.value())) * time.Second
+	return v, dec.Next()
+}
+
+func (dec *ttlvReader) DateTimeExtended(tag int) (time.Time, error) {
+	if err := dec.assertType(TypeDateTimeExtended, tag); err != nil {
+		return time.Time{}, err
+	}
+	//nolint:gosec // this cast is safe as we are parsing raw bytes.
+	v := time.Unix(int64(binary.BigEndian.Uint64(dec.value())), 0)
 	return v, dec.Next()
 }
 

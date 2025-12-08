@@ -9,6 +9,7 @@ var (
 	V2_0 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 0}
 	V2_1 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 1}
 	V2_2 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 2}
+	V3_0 = ProtocolVersion{ProtocolVersionMajor: 3, ProtocolVersionMinor: 0}
 )
 
 var (

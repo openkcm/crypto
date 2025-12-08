@@ -141,6 +141,10 @@ func (enc *xmlWriter) Interval(tag int, interval time.Duration) {
 	enc.encode(TypeInterval, tag, strconv.Itoa(int(interval.Seconds())))
 }
 
+func (enc *xmlWriter) DateTimeExtended(tag int, date time.Time) {
+	enc.encode(TypeDateTimeExtended, tag, date.Format(time.RFC3339))
+}
+
 func (enc *xmlWriter) Bitmask(bitmasktag, tag int, value int32) {
 	if bitmasktag <= 0 {
 		bitmasktag = tag
@@ -400,6 +404,17 @@ func (dec *xmlReader) Interval(tag int) (time.Duration, error) {
 	}
 	//nolint:gosec // this cast is safe as we are parsing a 32 bits value
 	return time.Duration(parsed) * time.Second, dec.Next()
+}
+
+func (dec *xmlReader) DateTimeExtended(tag int) (time.Time, error) {
+	if err := dec.assertType(TypeDateTimeExtended, tag); err != nil {
+		return time.Time{}, err
+	}
+	dt, err := time.Parse(time.RFC3339, dec.value())
+	if err != nil {
+		return time.Time{}, err
+	}
+	return dt.Local(), dec.Next()
 }
 
 func (dec *xmlReader) Bitmask(realtag, tag int) (int32, error) {
