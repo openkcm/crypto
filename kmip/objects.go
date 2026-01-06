@@ -16,15 +16,16 @@ import (
 )
 
 var objectTypes = map[ObjectType]reflect.Type{
-	ObjectTypeSecretData:   reflect.TypeFor[SecretData](),
-	ObjectTypeCertificate:  reflect.TypeFor[Certificate](),
-	ObjectTypeSymmetricKey: reflect.TypeFor[SymmetricKey](),
-	ObjectTypePublicKey:    reflect.TypeFor[PublicKey](),
-	ObjectTypePrivateKey:   reflect.TypeFor[PrivateKey](),
-	ObjectTypeSplitKey:     reflect.TypeFor[SplitKey](),
-	ObjectTypeOpaqueObject: reflect.TypeFor[OpaqueObject](),
-	ObjectTypeTemplate:     reflect.TypeFor[Template](),
-	ObjectTypePGPKey:       reflect.TypeFor[PGPKey](),
+	ObjectTypeSecretData:         reflect.TypeFor[SecretData](),
+	ObjectTypeCertificate:        reflect.TypeFor[Certificate](),
+	ObjectTypeSymmetricKey:       reflect.TypeFor[SymmetricKey](),
+	ObjectTypePublicKey:          reflect.TypeFor[PublicKey](),
+	ObjectTypePrivateKey:         reflect.TypeFor[PrivateKey](),
+	ObjectTypeSplitKey:           reflect.TypeFor[SplitKey](),
+	ObjectTypeOpaqueObject:       reflect.TypeFor[OpaqueObject](),
+	ObjectTypeTemplate:           reflect.TypeFor[Template](),
+	ObjectTypePGPKey:             reflect.TypeFor[PGPKey](),
+	ObjectTypeCertificateRequest: reflect.TypeFor[CertificateRequest](),
 }
 
 // TODO: Make it private.
@@ -718,4 +719,13 @@ type PGPKey struct {
 
 func (sd *PGPKey) ObjectType() ObjectType {
 	return ObjectTypePGPKey
+}
+
+type CertificateRequest struct {
+	CertificateRequestType  CertificateRequestType
+	CertificateRequestValue []byte
+}
+
+func (sd *CertificateRequest) ObjectType() ObjectType {
+	return ObjectTypeCertificateRequest
 }

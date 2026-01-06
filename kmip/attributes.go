@@ -80,6 +80,18 @@ const (
 	AttributeNameAlwaysSensitive     AttributeName = "Always Sensitive"
 	AttributeNameExtractable         AttributeName = "Extractable"
 	AttributeNameNeverExtractable    AttributeName = "Never Extractable"
+	AttributeNameKeyFormatType       AttributeName = "Key Format Type"
+	AttributeNameOpaqueDataType      AttributeName = "Opaque Data Type"
+
+	// KMIP 2.0
+	AttributeNameCertificateAttributes           AttributeName = "Certificate Attributes"
+	AttributeNameNISTKeyType                     AttributeName = "NIST Key Type"
+	AttributeNameProtectionLevel                 AttributeName = "Protection Level"
+	AttributeNameProtectionPeriod                AttributeName = "Protection Period"
+	AttributeNameProtectionStorageMask           AttributeName = "Protection Storage Mask"
+	AttributeNameProtectionQuantumSafe           AttributeName = "Quantum Safe"
+	AttributeNameProtectionShortUniqueIdentifier AttributeName = "Short Unique Identifier"
+	AttributeNameProtectionVendorAttribute       AttributeName = "Vendor Attribute"
 )
 
 var AllAttributeNames = []AttributeName{
@@ -93,6 +105,10 @@ var AllAttributeNames = []AttributeName{
 	AttributeNameX509CertificateIssuer, AttributeNameDigitalSignatureAlgorithm, AttributeNameAlternativeName, AttributeNameKeyValuePresent, AttributeNameKeyValueLocation,
 	AttributeNameOriginalCreationDate, AttributeNameRandomNumberGenerator, AttributeNamePKCS_12FriendlyName, AttributeNameDescription, AttributeNameComment, AttributeNameSensitive,
 	AttributeNameAlwaysSensitive, AttributeNameExtractable, AttributeNameNeverExtractable,
+
+	AttributeNameCertificateAttributes, AttributeNameKeyFormatType, AttributeNameNISTKeyType, AttributeNameOpaqueDataType, AttributeNameProtectionLevel,
+	AttributeNameProtectionPeriod, AttributeNameProtectionStorageMask, AttributeNameProtectionQuantumSafe, AttributeNameProtectionShortUniqueIdentifier,
+	AttributeNameProtectionVendorAttribute,
 }
 
 var attrTypes = map[AttributeName]reflect.Type{
@@ -150,6 +166,17 @@ var attrTypes = map[AttributeName]reflect.Type{
 	AttributeNameAlwaysSensitive:     reflect.TypeFor[bool](),
 	AttributeNameExtractable:         reflect.TypeFor[bool](),
 	AttributeNameNeverExtractable:    reflect.TypeFor[bool](),
+
+	AttributeNameCertificateAttributes:           reflect.TypeFor[CertificateAttributes](),
+	AttributeNameKeyFormatType:                   reflect.TypeFor[KeyFormatType](),
+	AttributeNameNISTKeyType:                     reflect.TypeFor[NISTKeyType](),
+	AttributeNameOpaqueDataType:                  reflect.TypeFor[OpaqueDataType](),
+	AttributeNameProtectionLevel:                 reflect.TypeFor[ProtectionLevel](),
+	AttributeNameProtectionPeriod:                reflect.TypeFor[time.Duration](),
+	AttributeNameProtectionStorageMask:           reflect.TypeFor[ProtectionStorageMask](),
+	AttributeNameProtectionQuantumSafe:           reflect.TypeFor[bool](),
+	AttributeNameProtectionShortUniqueIdentifier: reflect.TypeFor[[]byte](),
+	AttributeNameProtectionVendorAttribute:       reflect.TypeFor[VendorAttribute](),
 }
 
 func newAttribute(name AttributeName) reflect.Value {

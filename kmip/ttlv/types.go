@@ -19,6 +19,9 @@ const (
 	TypeByteString
 	TypeDateTime
 	TypeInterval
+
+	// KMIP 2.0
+	TypeDateTimeExtended
 )
 
 func (ty Type) String() string {
@@ -51,6 +54,9 @@ var (
 		TypeByteString:  "ByteString",
 		TypeDateTime:    "DateTime",
 		TypeInterval:    "Interval",
+
+		// KMIP 2.0
+		TypeDateTimeExtended: "DateTimeExtended",
 	}
 	nameTypes = revMap(typesName)
 )

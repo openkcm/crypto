@@ -21,6 +21,7 @@ type writer interface {
 	ByteString(tag int, str []byte)
 	DateTime(tag int, date time.Time)
 	Interval(tag int, interval time.Duration)
+	DateTimeExtended(tag int, date time.Time)
 	Bitmask(realtag, tag int, value int32)
 }
 

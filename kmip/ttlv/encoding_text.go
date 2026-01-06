@@ -148,6 +148,13 @@ func (j *textWriter) Interval(tag int, interval time.Duration) {
 	})
 }
 
+// DateTime implements writer.
+func (j *textWriter) DateTimeExtended(tag int, date time.Time) {
+	j.encodeAppend(TypeDateTimeExtended, tag, func(b []byte) []byte {
+		return date.AppendFormat(b, time.RFC3339)
+	})
+}
+
 // Struct implements writer.
 func (j *textWriter) Struct(tag int, f func(writer)) {
 	j.startElem(TypeStructure, tag)
