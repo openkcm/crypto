@@ -3,12 +3,12 @@ package tenantmanager
 import (
 	"context"
 
+	"github.com/openkcm/common-sdk/pkg/status"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/internal/modules"
 	"github.com/openkcm/crypto/pkg/concurrent"
 	"github.com/openkcm/crypto/pkg/module"
 )
@@ -50,7 +50,9 @@ func (s *tenantManagerModule) RunServe(ctxStartup, ctxShutdown context.Context, 
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
 		s.serveMetrics,
-		s.serveStatusServer,
+		func(ctx context.Context) error {
+			return status.Serve(ctx, &s.config.BaseConfig)
+		},
 		s.serveHttpServer,
 	)
 	if err != nil {
@@ -63,10 +65,6 @@ func (s *tenantManagerModule) serveMetrics(_ context.Context) error {
 	return nil
 }
 
-func (s *tenantManagerModule) serveHttpServer(ctx context.Context) error {
+func (s *tenantManagerModule) serveHttpServer(_ context.Context) error {
 	return nil
-}
-
-func (s *tenantManagerModule) serveStatusServer(ctx context.Context) error {
-	return modules.ServeStatus(ctx, &s.config.BaseConfig)
 }
