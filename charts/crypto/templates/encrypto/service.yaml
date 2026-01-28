@@ -2,22 +2,22 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "crypto.fullname" . }}-encrypto
-  namespace: {{ include "crypto.namespace" . }}
+  name: {{ include "krypton.fullname" . }}-enkrypton
+  namespace: {{ include "krypton.namespace" . }}
   labels:
-    {{- include "crypto.encrypto.labels" . | nindent 4 }}
-    {{- with .Values.encrypto.service.labels }}
+    {{- include "krypton.enkrypton.labels" . | nindent 4 }}
+    {{- with .Values.enkrypton.service.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-{{- with .Values.encrypto.service.annotations }}
+{{- with .Values.enkrypton.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
 {{- end }}
 spec:
-  type: {{ .Values.encrypto.service.type }}
-{{- with .Values.encrypto.service.ports }}
+  type: {{ .Values.enkrypton.service.type }}
+{{- with .Values.enkrypton.service.ports }}
   ports:
     {{- toYaml . | nindent 4 }}
 {{- end }}
   selector:
-    {{- include "crypto.encrypto.selectorLabels" . | nindent 4 }}
+    {{- include "krypton.enkrypton.selectorLabels" . | nindent 4 }}

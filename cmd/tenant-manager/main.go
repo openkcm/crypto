@@ -12,11 +12,11 @@ import (
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/cmd"
-	"github.com/openkcm/crypto/internal/config"
-	tenantmanager "github.com/openkcm/crypto/internal/modules/tenant-manager"
-	"github.com/openkcm/crypto/pkg/cmds"
-	"github.com/openkcm/crypto/pkg/module"
+	"github.com/openkcm/krypton/cmd"
+	"github.com/openkcm/krypton/internal/config"
+	tenantmanager "github.com/openkcm/krypton/internal/modules/tenant-manager"
+	"github.com/openkcm/krypton/pkg/cmds"
+	"github.com/openkcm/krypton/pkg/module"
 )
 
 var (

@@ -1,6 +1,6 @@
 package kmipclient
 
-import "github.com/openkcm/crypto/kmip/payloads"
+import "github.com/openkcm/krypton/kmip/payloads"
 
 // GetAttributeList creates an ExecGetAttributeList operation to retrieve the list of attribute names
 // for the object identified by the given unique identifier. The returned ExecGetAttributeList can be

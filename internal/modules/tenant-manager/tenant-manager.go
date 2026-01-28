@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/pkg/concurrent"
-	"github.com/openkcm/crypto/pkg/module"
+	"github.com/openkcm/krypton/internal/config"
+	"github.com/openkcm/krypton/pkg/concurrent"
+	"github.com/openkcm/krypton/pkg/module"
 )
 
 const (

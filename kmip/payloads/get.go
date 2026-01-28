@@ -1,15 +1,15 @@
 package payloads
 
 import (
-	"crypto"
-	"crypto/ecdsa"
-	"crypto/rsa"
-	"crypto/x509"
 	"errors"
 	"fmt"
+	"krypton"
+	"krypton/ecdsa"
+	"krypton/rsa"
+	"krypton/x509"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func init() {
@@ -160,13 +160,13 @@ func (pl *GetResponsePayload) EcdsaPrivateKey() (*ecdsa.PrivateKey, error) {
 	return key.ECDSA()
 }
 
-// PrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
-func (pl *GetResponsePayload) PrivateKey() (crypto.PrivateKey, error) {
+// PrivateKey parses and return the private key object into a go [krypton.PrivateKey] object.
+func (pl *GetResponsePayload) PrivateKey() (krypton.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
 	key, ok := pl.Object.(interface {
-		CryptoPrivateKey() (crypto.PrivateKey, error)
+		CryptoPrivateKey() (krypton.PrivateKey, error)
 	})
 	if !ok {
 		return nil, errors.New("Object does not implement CryptoPrivateKey() method")
@@ -212,13 +212,13 @@ func (pl *GetResponsePayload) EcdsaPublicKey() (*ecdsa.PublicKey, error) {
 	return key.ECDSA()
 }
 
-// PublicKey parses and return the public key object into a go [crypto.PublicKey] object.
-func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
+// PublicKey parses and return the public key object into a go [krypton.PublicKey] object.
+func (pl *GetResponsePayload) PublicKey() (krypton.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
 	key, ok := pl.Object.(interface {
-		CryptoPublicKey() (crypto.PublicKey, error)
+		CryptoPublicKey() (krypton.PublicKey, error)
 	})
 	if !ok {
 		return nil, errors.New("Object does not implement ECDSA() method")

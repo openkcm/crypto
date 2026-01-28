@@ -1,20 +1,20 @@
 package kmipclient
 
 import (
-	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"krypton"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rsa"
+	"krypton/x509"
 	"math"
 	"math/big"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // Register initializes the registration process for a KMIP object.
@@ -274,7 +274,7 @@ func (ex ExecRegisterWantType) PemPublicKey(data []byte, usage kmip.Cryptographi
 		if err != nil {
 			return ex.error(err)
 		}
-		pk := key.(interface{ Public() crypto.PublicKey })
+		pk := key.(interface{ Public() krypton.PublicKey })
 		return ex.PublicKey(pk.Public(), usage)
 	default:
 		return ex.error(fmt.Errorf("Unsupported PEM type %q", block.Type))
@@ -373,7 +373,7 @@ func (ex ExecRegisterWantType) X509PublicKey(der []byte, usage kmip.Cryptographi
 // PrivateKey registers a private key (RSA or ECDSA).
 // Returns an ExecRegister with the specified private key set.
 // If the key type is unsupported, it returns an error.
-func (ex ExecRegisterWantType) PrivateKey(key crypto.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
+func (ex ExecRegisterWantType) PrivateKey(key krypton.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	switch pk := key.(type) {
 	case *rsa.PrivateKey:
 		return ex.RsaPrivateKey(pk, usage)
@@ -387,7 +387,7 @@ func (ex ExecRegisterWantType) PrivateKey(key crypto.PrivateKey, usage kmip.Cryp
 // PublicKey registers a public key (RSA or ECDSA).
 // Returns an ExecRegister with the specified public key set.
 // If the key type is unsupported, it returns an error.
-func (ex ExecRegisterWantType) PublicKey(key crypto.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
+func (ex ExecRegisterWantType) PublicKey(key krypton.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	switch pk := key.(type) {
 	case *rsa.PublicKey:
 		return ex.RsaPublicKey(pk, usage)

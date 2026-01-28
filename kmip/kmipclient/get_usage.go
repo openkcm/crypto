@@ -1,6 +1,6 @@
 package kmipclient
 
-import "github.com/openkcm/crypto/kmip/payloads"
+import "github.com/openkcm/krypton/kmip/payloads"
 
 // GetUsageAllocation creates an ExecGetUsageAllocation instance with the specified unique identifier
 // and usage limits count. This function initializes the request payload with the provided parameters.

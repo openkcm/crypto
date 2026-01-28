@@ -1,8 +1,8 @@
 package kmipclient
 
 import (
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 func (c *Client) Query() ExecQuery {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func init() {

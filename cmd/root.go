@@ -4,10 +4,10 @@ import "github.com/spf13/cobra"
 
 var (
 	RootCmd = &cobra.Command{
-		Use:   "crypto",
-		Short: "A secure key management and cryptographic operations service.",
+		Use:   "krypton",
+		Short: "A secure key management and kryptongraphic operations service.",
 		Long: `Crypto is a modular key management service designed to securely generate, store,
-	and use cryptographic keys for applications and microservices.
+	and use kryptongraphic keys for applications and microservices.
 	
 	It provides support for encryption, decryption, signing, hashing, secure key
 	storage, certificate-based operations, and protocol-specific interfaces such as

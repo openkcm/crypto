@@ -1,6 +1,6 @@
 package payloads
 
-import "github.com/openkcm/crypto/kmip"
+import "github.com/openkcm/krypton/kmip"
 
 func init() {
 	kmip.RegisterOperationPayload[SignRequestPayload, SignResponsePayload](kmip.OperationSign)
@@ -9,8 +9,8 @@ func init() {
 
 // This operation requests the server to perform a signature operation on the provided data using a
 // Managed Cryptographic Object as the key for the signature operation.
-// The request contains information about the cryptographic parameters (digital signature algorithm or
-// cryptographic algorithm and hash algorithm) and the data to be signed. The cryptographic parameters
+// The request contains information about the kryptongraphic parameters (digital signature algorithm or
+// kryptongraphic algorithm and hash algorithm) and the data to be signed. The kryptongraphic parameters
 // MAY be omitted from the request as they can be specified as associated attributes of the Managed
 // Cryptographic Object.
 //
@@ -32,7 +32,7 @@ type SignRequestPayload struct {
 	Data []byte `ttlv:",omitempty"`
 	// The digested data to be signed.
 	DigestedData []byte `ttlv:",omitempty,version=v1.4.."`
-	// Specifies the existing stream or by parts cryptographic operation (as returned from a previous call to this operation).
+	// Specifies the existing stream or by parts kryptongraphic operation (as returned from a previous call to this operation).
 	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 	// Initial operation.
 	InitIndicator *bool `ttlv:",version=v1.3.."`
@@ -56,7 +56,7 @@ type SignResponsePayload struct {
 	UniqueIdentifier string
 	// The signed data. Mandatory for kmip 1.2 or single-part operation, not for multi-part.
 	SignatureData []byte `ttlv:",omitempty"`
-	// Specifies the stream or by-parts value to be provided in subsequent calls to this operation for performing cryptographic operations.
+	// Specifies the stream or by-parts value to be provided in subsequent calls to this operation for performing kryptongraphic operations.
 	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 }
 
@@ -66,12 +66,12 @@ func (pl *SignResponsePayload) Operation() kmip.Operation {
 
 // This operation requests the server to perform a signature verify operation on the provided data using a
 // Managed Cryptographic Object as the key for the signature verification operation.
-// The request contains information about the cryptographic parameters (digital signature algorithm or
-// cryptographic algorithm and hash algorithm) and the signature to be verified and MAY contain the data
+// The request contains information about the kryptongraphic parameters (digital signature algorithm or
+// kryptongraphic algorithm and hash algorithm) and the signature to be verified and MAY contain the data
 // that was passed to the signing operation (for those algorithms which need the original data to verify a
 // signature).
 //
-// The cryptographic parameters MAY be omitted from the request as they can be specified as associated
+// The kryptongraphic parameters MAY be omitted from the request as they can be specified as associated
 // attributes of the Managed Cryptographic Object.
 type SignatureVerifyRequestPayload struct {
 	// The Unique Identifier of the Managed Cryptographic Object that is the key to use for the signature verify operation.
@@ -90,7 +90,7 @@ type SignatureVerifyRequestPayload struct {
 	DigestedData []byte `ttlv:",omitempty,version=v1.4.."`
 	// The signature to be verified. Mandatory for kmip 1.2 or for single-part operation. Not for multi-part.
 	SignatureData []byte `ttlv:",omitempty"`
-	// Specifies the existing stream or by-parts cryptographic operation (as returned from a previous call to this operation).
+	// Specifies the existing stream or by-parts kryptongraphic operation (as returned from a previous call to this operation).
 	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 	// Initial operation.
 	InitIndicator *bool `ttlv:",version=v1.3.."`
@@ -117,7 +117,7 @@ type SignatureVerifyResponsePayload struct {
 	ValidityIndicator kmip.ValidityIndicator
 	// The OPTIONAL recovered data (as a Byte String) for those signature algorithms where data recovery from the signature is supported.
 	Data []byte `ttlv:",omitempty"`
-	// Specifies the stream or by-parts value to be provided in subsequent calls to this operation for performing cryptographic operations.
+	// Specifies the stream or by-parts value to be provided in subsequent calls to this operation for performing kryptongraphic operations.
 	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 }
 

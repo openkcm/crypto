@@ -12,13 +12,13 @@ import (
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/cmd"
-	"github.com/openkcm/crypto/internal/config"
-	dbmigrate "github.com/openkcm/crypto/internal/modules/db-migrate"
-	"github.com/openkcm/crypto/internal/modules/kmipserver"
-	"github.com/openkcm/crypto/internal/modules/status"
-	"github.com/openkcm/crypto/pkg/cmds"
-	"github.com/openkcm/crypto/pkg/module"
+	"github.com/openkcm/krypton/cmd"
+	"github.com/openkcm/krypton/internal/config"
+	dbmigrate "github.com/openkcm/krypton/internal/modules/db-migrate"
+	"github.com/openkcm/krypton/internal/modules/kmipserver"
+	"github.com/openkcm/krypton/internal/modules/status"
+	"github.com/openkcm/krypton/pkg/cmds"
+	"github.com/openkcm/krypton/pkg/module"
 )
 
 var (
@@ -53,8 +53,8 @@ func main() {
 	ctx := context.Background()
 
 	cfg, err := config.LoadConfig(BuildInfo,
-		"/etc/crypto",
-		"$HOME/.crypto",
+		"/etc/krypton",
+		"$HOME/.krypton",
 		".",
 	)
 	if err != nil {

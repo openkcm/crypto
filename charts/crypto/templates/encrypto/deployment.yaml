@@ -1,37 +1,37 @@
-{{- $mergedEncryptoExtraEnvsFrom := list }}
+{{- $mergedEnkryptonExtraEnvsFrom := list }}
 
 {{- if .Values.tenantManager.extraEnvsFrom }}
-  {{- $mergedEncryptoExtraEnvsFrom = append $mergedEncryptoExtraEnvsFrom .Values.tenantManager.extraEnvsFrom }}
+  {{- $mergedEnkryptonExtraEnvsFrom = append $mergedEnkryptonExtraEnvsFrom .Values.tenantManager.extraEnvsFrom }}
 {{- end }}
 
 {{- if .Values.common.extraEnvsFrom }}
-  {{- $mergedEncryptoExtraEnvsFrom = append $mergedEncryptoExtraEnvsFrom .Values.common.extraEnvsFrom }}
+  {{- $mergedEnkryptonExtraEnvsFrom = append $mergedEnkryptonExtraEnvsFrom .Values.common.extraEnvsFrom }}
 {{- end }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "crypto.fullname" . }}-encrypto
-  namespace: {{ include "crypto.namespace" . }}
+  name: {{ include "krypton.fullname" . }}-enkrypton
+  namespace: {{ include "krypton.namespace" . }}
   labels:
-    {{- include "crypto.encrypto.labels" . | nindent 4 }}
+    {{- include "krypton.enkrypton.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.encrypto.hpa.enabled }}
-  replicas: {{ .Values.encrypto.hpa.minReplicas }}
+  {{- if .Values.enkrypton.hpa.enabled }}
+  replicas: {{ .Values.enkrypton.hpa.minReplicas }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "crypto.encrypto.selectorLabels" . | nindent 6 }}
+      {{- include "krypton.enkrypton.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.encrypto.pod.annotations }}
+      {{- with .Values.enkrypton.pod.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "crypto.encrypto.labels" . | nindent 8 }}
-        {{- with .Values.encrypto.pod.labels }}
+        {{- include "krypton.enkrypton.labels" . | nindent 8 }}
+        {{- with .Values.enkrypton.pod.labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -39,8 +39,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "crypto.serviceAccountName" . }}
-      {{- with .Values.encrypto.pod.securityContext }}
+      serviceAccountName: {{ include "krypton.serviceAccountName" . }}
+      {{- with .Values.enkrypton.pod.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -48,23 +48,23 @@ spec:
         {{- with .Values.common.extraContainers }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.encrypto.extraContainers }}
+        {{- with .Values.enkrypton.extraContainers }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        - name: {{ include "crypto.name" . }}
+        - name: {{ include "krypton.name" . }}
           {{- with .Values.common.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ template "crypto.image" (tuple .Values.common.image $.Chart.AppVersion) }}"
+          image: "{{ template "krypton.image" (tuple .Values.common.image $.Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.common.image.pullPolicy }}
           {{- with .Values.common.image.command }}
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          args: ["encrypto"]
+          args: ["enkrypton"]
           ports:
-            {{- with .Values.encrypto.extraPorts }}
+            {{- with .Values.enkrypton.extraPorts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
@@ -84,58 +84,58 @@ spec:
             {{- with .Values.common.extraEnvs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.encrypto.extraEnvs }}
+            {{- with .Values.enkrypton.extraEnvs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if gt (len $mergedEncryptoExtraEnvsFrom) 0 }}
+          {{- if gt (len $mergedEnkryptonExtraEnvsFrom) 0 }}
           envFrom:
-          {{- $mergedEncryptoExtraEnvsFrom | toYaml | nindent 12 }}
+          {{- $mergedEnkryptonExtraEnvsFrom | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.encrypto.livenessProbe }}
+          {{- with .Values.enkrypton.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.encrypto.readinessProbe }}
+          {{- with .Values.enkrypton.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.encrypto.resources }}
+          {{- with .Values.enkrypton.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: {{ include "crypto.name" . }}-config-volume
-              mountPath: /etc/encrypto
+            - name: {{ include "krypton.name" . }}-config-volume
+              mountPath: /etc/enkrypton
               readOnly: true
-          {{- with .Values.encrypto.extraVolumeMounts }}
+          {{- with .Values.enkrypton.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.common.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
-        - name: {{ include "crypto.name" . }}-config-volume
+        - name: {{ include "krypton.name" . }}-config-volume
           configMap:
-            name: {{ include "crypto.name" . }}-encrypto-config
-      {{- with .Values.encrypto.extraVolumes }}
+            name: {{ include "krypton.name" . }}-enkrypton-config
+      {{- with .Values.enkrypton.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.common.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.encrypto.pod.nodeSelector }}
+      {{- with .Values.enkrypton.pod.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.encrypto.pod.affinity }}
+      {{- with .Values.enkrypton.pod.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.encrypto.pod.topologySpreadConstraints }}
+      {{- with .Values.enkrypton.pod.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with .Values.encrypto.pod.tolerations }}
+      {{- with .Values.enkrypton.pod.tolerations }}
       tolerations:
         {{- toYaml . | nindent 6 }}
       {{- end }}

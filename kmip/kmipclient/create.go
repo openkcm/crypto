@@ -3,8 +3,8 @@ package kmipclient
 import (
 	"math"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Create initializes and returns a new ExecCreateWantType instance associated with the current Client.
@@ -52,12 +52,12 @@ func (ex ExecCreateWantType) Object(objectType kmip.ObjectType, attrs ...kmip.At
 }
 
 // SymmetricKey configures the creation of a symmetric key object with the specified
-// cryptographic algorithm, key length, and usage mask. It panics if the provided
+// kryptongraphic algorithm, key length, and usage mask. It panics if the provided
 // length is negative or exceeds the maximum value for an int32. The method sets
-// the object type to SymmetricKey and attaches the relevant cryptographic attributes.
+// the object type to SymmetricKey and attaches the relevant kryptongraphic attributes.
 //
 // Parameters:
-//   - alg: The cryptographic algorithm to use for the symmetric key (e.g., AES, 3DES).
+//   - alg: The kryptongraphic algorithm to use for the symmetric key (e.g., AES, 3DES).
 //   - length: The length of the key in bits. Must be between 0 and math.MaxInt32.
 //   - usage: The intended usage mask for the key (bitmask of allowed operations).
 //
@@ -77,13 +77,13 @@ func (ex ExecCreateWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, lengt
 		WithAttribute(kmip.AttributeNameCryptographicUsageMask, usage)
 }
 
-// AES creates a symmetric key of the specified length using the AES cryptographic algorithm,
-// and assigns the provided cryptographic usage mask. It returns an ExecCreate instance
+// AES creates a symmetric key of the specified length using the AES kryptongraphic algorithm,
+// and assigns the provided kryptongraphic usage mask. It returns an ExecCreate instance
 // configured for AES key creation.
 //
 // Parameters:
 //   - length: The length of the AES key in bits (e.g., 128, 192, 256).
-//   - usage: The intended cryptographic usage mask for the key.
+//   - usage: The intended kryptongraphic usage mask for the key.
 //
 // Returns:
 //   - ExecCreate: An instance configured for AES key creation.
@@ -95,12 +95,12 @@ func (ex ExecCreateWantType) AES(length int, usage kmip.CryptographicUsageMask) 
 	return ex.SymmetricKey(kmip.CryptographicAlgorithmAES, length, usage)
 }
 
-// TDES creates a symmetric key using the 3DES cryptographic algorithm with the specified key length and usage mask.
+// TDES creates a symmetric key using the 3DES kryptongraphic algorithm with the specified key length and usage mask.
 // It returns an ExecCreate configured for 3DES key creation.
 //
 // Parameters:
 //   - length: The length of the 3DES key in bits.
-//   - usage: The intended cryptographic usage mask for the key.
+//   - usage: The intended kryptongraphic usage mask for the key.
 //
 // Returns:
 //   - ExecCreate: An instance configured for 3DES key creation.
@@ -114,8 +114,8 @@ func (ex ExecCreateWantType) TDES(length int, usage kmip.CryptographicUsageMask)
 	return ex.SymmetricKey(kmip.CryptographicAlgorithm3DES, length, usage)
 }
 
-// Skipjack creates a symmetric key with the SKIPJACK cryptographic algorithm and a key length of 80 bits.
-// It sets the specified cryptographic usage mask for the key.
+// Skipjack creates a symmetric key with the SKIPJACK kryptongraphic algorithm and a key length of 80 bits.
+// It sets the specified kryptongraphic usage mask for the key.
 // Returns an ExecCreate instance configured with these parameters.
 //
 // Deprecated: SKIPJACK is insecure and shouldn't be used.

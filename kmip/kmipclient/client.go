@@ -41,19 +41,19 @@ package kmipclient
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
+	"krypton/tls"
+	"krypton/x509"
 	"net"
 	"os"
 	"slices"
 	"sync"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 var supportedVersions = []kmip.ProtocolVersion{kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
@@ -326,7 +326,7 @@ func WithTlsCipherSuiteNames(ciphers ...string) Option {
 
 // WithTlsCipherSuites returns an Option that appends the provided TLS cipher suite IDs
 // to the client's list of supported cipher suites. The cipher suites should be specified
-// as uint16 values, typically using the constants defined in the crypto/tls package.
+// as uint16 values, typically using the constants defined in the krypton/tls package.
 // This allows customization of the TLS handshake to restrict or prioritize certain ciphers.
 //
 // Example usage:

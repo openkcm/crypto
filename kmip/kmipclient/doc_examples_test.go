@@ -2,17 +2,17 @@ package kmipclient_test
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rand"
 	"log"
 	"time"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Example demonstrates how to establish a connection to a KMIP server.
@@ -139,7 +139,7 @@ func ExampleClient_Encrypt() {
 	plaintext := []byte("Hello, KMIP!")
 	resp, err := client.Encrypt("key-12345").
 		WithCryptographicParameters(kmip.AES_GCM).
-		WithIvCounterNonce(iv). // May be optional depending on the cryptographic parameters used
+		WithIvCounterNonce(iv). // May be optional depending on the kryptongraphic parameters used
 		Data(plaintext).
 		Exec()
 	if err != nil {

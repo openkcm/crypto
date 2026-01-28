@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestAttribute_EncodeDecode(t *testing.T) {

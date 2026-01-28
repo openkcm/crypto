@@ -5,15 +5,15 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "crypto.fullname" . }}-tenant-manager
-  namespace: {{ include "crypto.namespace" . }}
+  name: {{ include "krypton.fullname" . }}-tenant-manager
+  namespace: {{ include "krypton.namespace" . }}
   labels:
-    {{- include "crypto.tenant-manager.labels" . | nindent 4 }}
+    {{- include "krypton.tenant-manager.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "crypto.fullname" . }}-tenant-manager
+    name: {{ include "krypton.fullname" . }}-tenant-manager
   minReplicas: {{ .Values.tenantManager.hpa.minReplicas }}
   maxReplicas: {{ .Values.tenantManager.hpa.maxReplicas }}
   metrics:

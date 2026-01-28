@@ -1,6 +1,6 @@
 .PHONY: clean
 clean:
-	rm -f cover.out cover.html crypto
+	rm -f cover.out cover.html krypton
 	rm -rf cover/
 
 .PHONY: lint

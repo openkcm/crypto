@@ -1,7 +1,7 @@
 package kmipclient
 
 import (
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Activate creates and returns an ExecActivate struct initialized with the provided unique identifier.

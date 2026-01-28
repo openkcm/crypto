@@ -1,7 +1,7 @@
 package kmipclient
 
 import (
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Archive creates an ExecArchive operation for the specified unique identifier.

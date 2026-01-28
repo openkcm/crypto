@@ -12,14 +12,14 @@ package kmiptest
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rand"
+	"krypton/tls"
+	"krypton/x509"
 	"math/big"
 	"net"
 	"os"
@@ -27,9 +27,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip/kmipclient"
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // TestingT is an interface wrapper around *testing.T.

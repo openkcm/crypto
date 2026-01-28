@@ -1,6 +1,6 @@
 package payloads
 
-import "github.com/openkcm/crypto/kmip"
+import "github.com/openkcm/krypton/kmip"
 
 func init() {
 	kmip.RegisterOperationPayload[LocateRequestPayload, LocateResponsePayload](kmip.OperationLocate)

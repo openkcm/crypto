@@ -3,8 +3,8 @@ package kmipclient
 import (
 	"time"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Revoke creates an ExecRevoke operation for the specified unique identifier.

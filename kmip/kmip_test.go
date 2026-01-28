@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmiptest"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmiptest"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestEncodeDecodeRequest(t *testing.T) {

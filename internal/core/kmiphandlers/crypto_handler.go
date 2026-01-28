@@ -3,20 +3,20 @@ package kmiphandlers
 import (
 	"bytes"
 	"context"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"io"
+	"krypton/x509"
 	"net/http"
 
-	"github.com/openkcm/crypto/internal/core"
-	"github.com/openkcm/crypto/internal/core/authorization"
-	"github.com/openkcm/crypto/internal/core/operations"
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/internal/core"
+	"github.com/openkcm/krypton/internal/core/authorization"
+	"github.com/openkcm/krypton/internal/core/operations"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip/ttlv"
 	slogctx "github.com/veqryn/slog-context"
 )
 

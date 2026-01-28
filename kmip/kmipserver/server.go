@@ -2,17 +2,17 @@ package kmipserver
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
+	"krypton/tls"
 	"log/slog"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 var ErrShutdown = errors.New("Server is shutting down")

@@ -8,9 +8,9 @@ import (
 
 	_ "unsafe"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestPayloadsTypes(t *testing.T) {
@@ -20,10 +20,10 @@ func TestPayloadsTypes(t *testing.T) {
 	}
 }
 
-//go:linkname newRequestPayload github.com/openkcm/crypto/kmip.newRequestPayload
+//go:linkname newRequestPayload github.com/openkcm/krypton/kmip.newRequestPayload
 func newRequestPayload(op kmip.Operation) kmip.OperationPayload
 
-//go:linkname newResponsePayload github.com/openkcm/crypto/kmip.newResponsePayload
+//go:linkname newResponsePayload github.com/openkcm/krypton/kmip.newResponsePayload
 func newResponsePayload(op kmip.Operation) kmip.OperationPayload
 
 func TestRegisterRequestPayload_Encode_Decode(t *testing.T) {

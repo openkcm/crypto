@@ -3,7 +3,7 @@ package kmip
 import (
 	"fmt"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 type ProtocolVersion struct {

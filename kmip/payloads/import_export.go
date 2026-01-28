@@ -3,8 +3,8 @@ package payloads
 import (
 	"errors"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // init registers the Import and Export operation payloads with the KMIP package.

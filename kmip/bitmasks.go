@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // init registers the bitmask string representations for CryptographicUsageMask and StorageStatusMask
@@ -40,10 +40,10 @@ func init() {
 	)
 }
 
-// CryptographicUsageMask represents a set of bitmask flags indicating the permitted cryptographic operations
-// that can be performed with a cryptographic object, such as encrypt, decrypt, sign, or verify.
+// CryptographicUsageMask represents a set of bitmask flags indicating the permitted kryptongraphic operations
+// that can be performed with a kryptongraphic object, such as encrypt, decrypt, sign, or verify.
 // Each bit in the mask corresponds to a specific usage permission as defined by the KMIP specification.
-// This type is used to restrict or allow certain cryptographic operations on keys and other objects.
+// This type is used to restrict or allow certain kryptongraphic operations on keys and other objects.
 type CryptographicUsageMask int32
 
 const (
@@ -75,9 +75,9 @@ const (
 	CryptographicUsageCertificateSign
 	// CryptographicUsageCRLSign allows the object to be used for CRL signing.
 	CryptographicUsageCRLSign
-	// CryptographicUsageGenerateCryptogram allows the object to be used for cryptogram generation.
+	// CryptographicUsageGenerateCryptogram allows the object to be used for kryptongram generation.
 	CryptographicUsageGenerateCryptogram
-	// CryptographicUsageValidateCryptogram allows the object to be used for cryptogram validation.
+	// CryptographicUsageValidateCryptogram allows the object to be used for kryptongram validation.
 	CryptographicUsageValidateCryptogram
 	// CryptographicUsageTranslateEncrypt allows the object to be used for translation encryption.
 	CryptographicUsageTranslateEncrypt

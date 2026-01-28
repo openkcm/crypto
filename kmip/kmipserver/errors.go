@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // Error represents a KMIP error with a specific reason and an optional message.

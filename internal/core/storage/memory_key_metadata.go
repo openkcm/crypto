@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/openkcm/crypto/internal/config"
+	"github.com/openkcm/krypton/internal/config"
 )
 
 type memoryKeyMetadataStorage struct {

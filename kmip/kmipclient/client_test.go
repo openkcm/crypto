@@ -12,12 +12,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/kmip/kmiptest"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip/kmiptest"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestRequest_ContextTimeout(t *testing.T) {

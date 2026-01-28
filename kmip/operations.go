@@ -3,7 +3,7 @@ package kmip
 import (
 	"reflect"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func init() {

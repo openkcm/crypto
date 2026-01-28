@@ -1,6 +1,6 @@
 package kmipclient
 
-import "github.com/openkcm/crypto/kmip/payloads"
+import "github.com/openkcm/krypton/kmip/payloads"
 
 // ObtainLease creates an ExecObtainLease operation to obtain a lease for the object identified by the given unique identifier.
 // The returned ExecObtainLease can be executed to perform the obtain lease operation.

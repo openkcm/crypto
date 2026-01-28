@@ -1,6 +1,6 @@
 apiVersion: v2
-name: crypto
-description: Crypto Helm Chart
+name: krypton
+description: Krypton Helm Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

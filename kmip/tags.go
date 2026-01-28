@@ -1,7 +1,7 @@
 package kmip
 
 import (
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 const (

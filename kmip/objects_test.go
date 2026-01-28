@@ -1,12 +1,12 @@
 package kmip
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rand"
+	"krypton/rsa"
+	"krypton/x509"
 	"math/big"
 	"net"
 	"testing"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestObjectTypes(t *testing.T) {
@@ -192,9 +192,9 @@ func TestPublicKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, &rsaKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey.Public(), cryptoKey)
+		require.EqualValues(t, rsaKey.Public(), kryptonKey)
 	})
 
 	t.Run("spki", func(t *testing.T) {
@@ -208,9 +208,9 @@ func TestPublicKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, &rsaKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey.Public(), cryptoKey)
+		require.EqualValues(t, rsaKey.Public(), kryptonKey)
 	})
 
 	t.Run("transparent", func(t *testing.T) {
@@ -224,9 +224,9 @@ func TestPublicKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, &rsaKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey.Public(), cryptoKey)
+		require.EqualValues(t, rsaKey.Public(), kryptonKey)
 	})
 }
 
@@ -243,9 +243,9 @@ func TestPublicKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, &ecKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey.Public(), cryptoKey)
+		require.EqualValues(t, ecKey.Public(), kryptonKey)
 	})
 
 	t.Run("transparent-uncompressed", func(t *testing.T) {
@@ -262,9 +262,9 @@ func TestPublicKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, &ecKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey.Public(), cryptoKey)
+		require.EqualValues(t, ecKey.Public(), kryptonKey)
 	})
 
 	t.Run("transparent-compressed-prime", func(t *testing.T) {
@@ -280,9 +280,9 @@ func TestPublicKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, &ecKey.PublicKey, pub)
-		cryptoKey, err := pkey.CryptoPublicKey()
+		kryptonKey, err := pkey.CryptoPublicKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey.Public(), cryptoKey)
+		require.EqualValues(t, ecKey.Public(), kryptonKey)
 	})
 }
 
@@ -299,9 +299,9 @@ func TestPrivateKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, rsaKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey, cryptoKey)
+		require.EqualValues(t, rsaKey, kryptonKey)
 	})
 
 	t.Run("pkcs8", func(t *testing.T) {
@@ -315,9 +315,9 @@ func TestPrivateKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, rsaKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey, cryptoKey)
+		require.EqualValues(t, rsaKey, kryptonKey)
 	})
 
 	t.Run("transparent", func(t *testing.T) {
@@ -337,9 +337,9 @@ func TestPrivateKey_RSA(t *testing.T) {
 		pub, err := pkey.RSA()
 		require.NoError(t, err)
 		require.Equal(t, rsaKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, rsaKey, cryptoKey)
+		require.EqualValues(t, rsaKey, kryptonKey)
 	})
 }
 
@@ -356,9 +356,9 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, ecKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey, cryptoKey)
+		require.EqualValues(t, ecKey, kryptonKey)
 	})
 	t.Run("sec1", func(t *testing.T) {
 		der, _ := x509.MarshalECPrivateKey(ecKey)
@@ -371,9 +371,9 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, ecKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey, cryptoKey)
+		require.EqualValues(t, ecKey, kryptonKey)
 	})
 
 	t.Run("transparent", func(t *testing.T) {
@@ -387,8 +387,8 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 		pub, err := pkey.ECDSA()
 		require.NoError(t, err)
 		require.Equal(t, ecKey, pub)
-		cryptoKey, err := pkey.CryptoPrivateKey()
+		kryptonKey, err := pkey.CryptoPrivateKey()
 		require.NoError(t, err)
-		require.EqualValues(t, ecKey, cryptoKey)
+		require.EqualValues(t, ecKey, kryptonKey)
 	})
 }

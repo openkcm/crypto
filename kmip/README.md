@@ -1,7 +1,7 @@
 # kmip-go
-[![Go Reference](https://pkg.go.dev/badge/github.com/openkcm/crypto/kmip.svg)](https://pkg.go.dev/github.com/openkcm/crypto/kmip) [![license](https://img.shields.io/badge/license-Apache%202.0-red.svg?style=flat)](https://raw.githubusercontent.com/ovh/kmip-go/master/LICENSE) [![test](https://github.com/openkcm/crypto/kmip/actions/workflows/test.yaml/badge.svg)](https://github.com/openkcm/crypto/kmip/actions/workflows/test.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/openkcm/crypto/kmip)](https://goreportcard.com/report/github.com/openkcm/crypto/kmip)
+[![Go Reference](https://pkg.go.dev/badge/github.com/openkcm/krypton/kmip.svg)](https://pkg.go.dev/github.com/openkcm/krypton/kmip) [![license](https://img.shields.io/badge/license-Apache%202.0-red.svg?style=flat)](https://raw.githubusercontent.com/ovh/kmip-go/master/LICENSE) [![test](https://github.com/openkcm/krypton/kmip/actions/workflows/test.yaml/badge.svg)](https://github.com/openkcm/krypton/kmip/actions/workflows/test.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/openkcm/krypton/kmip)](https://goreportcard.com/report/github.com/openkcm/krypton/kmip)
 
-A comprehensive Go implementation of the Key Management Interoperability Protocol (KMIP), supporting KMIP versions 1.0 through 1.4. This library provides both client and server implementations with full support for cryptographic operations, key lifecycle management, and secure communication.
+A comprehensive Go implementation of the Key Management Interoperability Protocol (KMIP), supporting KMIP versions 1.0 through 1.4. This library provides both client and server implementations with full support for kryptongraphic operations, key lifecycle management, and secure communication.
 See [KMIP v1.4 protocol specification](https://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.pdf).
 
 ## 🚀 Features
@@ -16,7 +16,7 @@ See [KMIP v1.4 protocol specification](https://docs.oasis-open.org/kmip/spec/v1.
 - **TLS Security**: Built-in TLS support with client certificate authentication
 - **Batch Operations**: Support for batching multiple operations in a single request
 - **Middleware System**: Extensible middleware for logging, debugging, and custom functionality
-- **Go standard crypto compatible**: Implements crypto.Signer interface and support cryptographic key types from the standard library
+- **Go standard krypton compatible**: Implements krypton.Signer interface and support kryptongraphic key types from the standard library
 - **Production Ready**: Developed and tested against [OVHcloud KMS](https://help.ovhcloud.com/csm/en-ie-kms-quick-start?id=kb_article_view&sysparm_article=KB0063362)
 
 ## 📚 Table of Contents
@@ -39,7 +39,7 @@ See [KMIP v1.4 protocol specification](https://docs.oasis-open.org/kmip/spec/v1.
 ## 📦 Installation
 
 ```bash
-go getgithub.com/openkcm/crypto/kmip@latest
+go getgithub.com/openkcm/krypton/kmip@latest
 ```
 
 ## 🏃 Quick Start
@@ -51,8 +51,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
 )
 
 func main() {
@@ -98,9 +98,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // Connect with comprehensive options
@@ -169,7 +169,7 @@ fmt.Printf("Public Key ID: %s\n", ecdsaKeyPair.PublicKeyUniqueIdentifier
 
 #### Object Registration
 ```go
-// Register existing cryptographic material
+// Register existing kryptongraphic material
 registered := client.Register().
 	Object(existingKeyObject).
 	WithName("imported-object").
@@ -240,17 +240,17 @@ verified := client.SignatureVerify(publicKeyID).
 fmt.Printf("Signature valid: %t\n", verified.ValidityIndicator == kmip.ValidityIndicatorValid)
 ```
 
-#### Go crypto.Signer Interface
+#### Go krypton.Signer Interface
 ```go
-// Get a crypto.Signer for use with standard Go crypto packages
+// Get a krypton.Signer for use with standard Go krypton packages
 signer, err := client.Signer(ctx, privateKeyID, publicKeyID)
 if err != nil {
 	log.Fatal(err)
 }
 
-// Use with crypto packages
+// Use with krypton packages
 hash := sha256.Sum256(data)
-signature, err := signer.Sign(rand.Reader, hash[:], crypto.SHA256)
+signature, err := signer.Sign(rand.Reader, hash[:], krypton.SHA256)
 if err != nil {
 	log.Fatal(err)
 }
@@ -419,12 +419,12 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
+	"krypton/tls"
 	"log"
 	"net"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipserver"
 )
 
 // Implement the RequestHandler interface
@@ -905,7 +905,7 @@ client, err := kmipclient.Dial(
 
 ```bash
 # Clone repository
-git clone https://github.com/openkcm/crypto/kmip.git
+git clone https://github.com/openkcm/krypton/kmip.git
 cd kmip-go
 
 # Install dependencies
@@ -937,8 +937,8 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## 🆘 Support
 
-- **Documentation**: [Go Reference](https://pkg.go.dev/github.com/openkcm/crypto/kmip)
-- **Issues**: [GitHub Issues](https://github.com/openkcm/crypto/kmip/issues)
+- **Documentation**: [Go Reference](https://pkg.go.dev/github.com/openkcm/krypton/kmip)
+- **Issues**: [GitHub Issues](https://github.com/openkcm/krypton/kmip/issues)
 - **OVHcloud KMS**: [Documentation](https://help.ovhcloud.com/csm/en-ie-kms-quick-start?id=kb_article_view&sysparm_article=KB0063362)
 - **KMIP Standard**:
 	- [KMIP v1.4 Specification](https://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.pdf)

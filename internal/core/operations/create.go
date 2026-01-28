@@ -3,9 +3,9 @@ package operations
 import (
 	"context"
 
-	"github.com/openkcm/crypto/internal/core"
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/internal/core"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 type create struct {

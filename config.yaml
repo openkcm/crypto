@@ -1,5 +1,5 @@
 application:
-  name: crypto
+  name: krypton
   environment: development
 
 status:

@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "crypto.name" -}}
+{{- define "krypton.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "crypto.fullname" -}}
+{{- define "krypton.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -31,23 +31,23 @@ By default this is not set so the helm release namespace will be used
 This gets around an problem within helm discussed here
 https://github.com/helm/helm/issues/5358
 */}}
-{{- define "crypto.namespace" -}}
+{{- define "krypton.namespace" -}}
     {{ .Values.namespace | default .Release.Namespace }}
 {{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "crypto.chart" -}}
+{{- define "krypton.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "crypto.labels" -}}
-helm.sh/chart: {{ include "crypto.chart" . }}
-{{ include "crypto.selectorLabels" . }}
+{{- define "krypton.labels" -}}
+helm.sh/chart: {{ include "krypton.chart" . }}
+{{ include "krypton.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -55,53 +55,53 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Encrypto Selector labels
+Enkrypton Selector labels
 */}}
-{{- define "crypto.encrypto.labels" -}}
-{{ include "crypto.labels" . }}
-{{ include "crypto.name" . }}.openkcm.io/component: encrypto
+{{- define "krypton.enkrypton.labels" -}}
+{{ include "krypton.labels" . }}
+{{ include "krypton.name" . }}.openkcm.io/component: enkrypton
 {{- end }}
 
 {{/*
 Tenant Manager Selector labels
 */}}
-{{- define "crypto.tenant-manager.labels" -}}
-{{ include "crypto.labels" . }}
-{{ include "crypto.name" . }}.openkcm.io/component: tenant-manager
+{{- define "krypton.tenant-manager.labels" -}}
+{{ include "krypton.labels" . }}
+{{ include "krypton.name" . }}.openkcm.io/component: tenant-manager
 {{- end }}
 
 
 {{/*
 Common Selector labels
 */}}
-{{- define "crypto.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "crypto.name" . }}
+{{- define "krypton.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "krypton.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: {{ .Chart.Name }}
 {{- end }}
 
 {{/*
-Encrypto Selector labels
+Enkrypton Selector labels
 */}}
-{{- define "crypto.encrypto.selectorLabels" -}}
-{{ include "crypto.selectorLabels" . }}
-{{ include "crypto.name" . }}.openkcm.io/component: encrypto
+{{- define "krypton.enkrypton.selectorLabels" -}}
+{{ include "krypton.selectorLabels" . }}
+{{ include "krypton.name" . }}.openkcm.io/component: enkrypton
 {{- end }}
 
 {{/*
 Tenant Manager Selector labels
 */}}
-{{- define "crypto.tenant-manager.selectorLabels" -}}
-{{ include "crypto.selectorLabels" . }}
-{{ include "crypto.name" . }}.openkcm.io/component: tenant-manager
+{{- define "krypton.tenant-manager.selectorLabels" -}}
+{{ include "krypton.selectorLabels" . }}
+{{ include "krypton.name" . }}.openkcm.io/component: tenant-manager
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "crypto.serviceAccountName" -}}
+{{- define "krypton.serviceAccountName" -}}
 {{- if .Values.common.serviceAccount.create }}
-{{- default (include "crypto.fullname" .) .Values.common.serviceAccount.name }}
+{{- default (include "krypton.fullname" .) .Values.common.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.common.serviceAccount.name }}
 {{- end }}
@@ -110,7 +110,7 @@ Create the name of the service account to use
 {{/*
 Util function for generating the image URL based on the provided options.
 */}}
-{{- define "crypto.image" -}}
+{{- define "krypton.image" -}}
 {{- $defaultTag := index . 1 -}}
 {{- with index . 0 -}}
 {{- if .registry -}}{{ printf "%s/%s" .registry .repository }}{{- else -}}{{- .repository -}}{{- end -}}

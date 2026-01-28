@@ -2,31 +2,31 @@ package kmipserver
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
+	"krypton/tls"
 	"net"
 	"net/http"
 
 	"github.com/openkcm/common-sdk/pkg/commoncfg"
-	"github.com/openkcm/crypto/internal/core"
-	"github.com/openkcm/crypto/internal/core/authorization"
-	"github.com/openkcm/crypto/internal/core/kmiphandlers"
-	"github.com/openkcm/crypto/internal/core/operations"
+	"github.com/openkcm/krypton/internal/core"
+	"github.com/openkcm/krypton/internal/core/authorization"
+	"github.com/openkcm/krypton/internal/core/kmiphandlers"
+	"github.com/openkcm/krypton/internal/core/operations"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	slogctx "github.com/veqryn/slog-context"
 
-	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/pkg/concurrent"
-	"github.com/openkcm/crypto/pkg/module"
-	"github.com/openkcm/crypto/pkg/module/serve"
+	"github.com/openkcm/krypton/internal/config"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/pkg/concurrent"
+	"github.com/openkcm/krypton/pkg/module"
+	"github.com/openkcm/krypton/pkg/module/serve"
 )
 
 const (
-	moduleCryptoName = "kmip-crypto"
+	moduleCryptoName = "kmip-krypton"
 )
 
 // kmipEdgeServerModule implements module.EmbeddedModule interface.

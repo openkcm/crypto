@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 func TestClientServer(t *testing.T) {

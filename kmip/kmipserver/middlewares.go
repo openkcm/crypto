@@ -6,8 +6,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // Next defines a middleware function signature that takes a context and a KMIP request message,

@@ -1,7 +1,7 @@
 package payloads
 
 import (
-	"github.com/openkcm/crypto/kmip"
+	"github.com/openkcm/krypton/kmip"
 )
 
 func init() {

@@ -96,7 +96,7 @@ formatters:
       sections:
         - standard
         - default
-        - prefix(github.com/openkcm/crypto)
+        - prefix(github.com/openkcm/krypton)
         - blank
         - dot
         - alias

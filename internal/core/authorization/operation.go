@@ -1,9 +1,9 @@
 package authorization
 
 import (
-	"crypto/x509"
+	"krypton/x509"
 
-	"github.com/openkcm/crypto/kmip"
+	"github.com/openkcm/krypton/kmip"
 )
 
 type Authorisation interface {

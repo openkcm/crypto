@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/internal/core/storage"
+	"github.com/openkcm/krypton/internal/config"
+	"github.com/openkcm/krypton/internal/core/storage"
 )
 
 type ServiceRegistry interface {

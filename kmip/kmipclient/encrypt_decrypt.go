@@ -1,8 +1,8 @@
 package kmipclient
 
 import (
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // ExecEncrypt is a specialized executor for handling Encrypt operations.
@@ -16,7 +16,7 @@ import (
 //
 // Errors:
 //   - Errors may be returned when executing the encrypt operation if the key is invalid,
-//     the server rejects the operation, or the cryptographic parameters are not supported.
+//     the server rejects the operation, or the kryptongraphic parameters are not supported.
 type ExecEncrypt struct {
 	Executor[*payloads.EncryptRequestPayload, *payloads.EncryptResponsePayload]
 }
@@ -32,7 +32,7 @@ type ExecEncrypt struct {
 //
 // Errors:
 //   - Errors may be returned when executing the decrypt operation if the key is invalid,
-//     the server rejects the operation, or the cryptographic parameters are not supported.
+//     the server rejects the operation, or the kryptongraphic parameters are not supported.
 type ExecDecrypt struct {
 	Executor[*payloads.DecryptRequestPayload, *payloads.DecryptResponsePayload]
 }
@@ -101,14 +101,14 @@ func (ex ExecDecryptWantsData) WithAAD(aad []byte) ExecDecryptWantsData {
 	return ex
 }
 
-// WithCryptographicParameters sets the cryptographic parameters for the encryption or decryption operation.
+// WithCryptographicParameters sets the kryptongraphic parameters for the encryption or decryption operation.
 // Returns the updated builder for method chaining.
 func (ex ExecEncryptWantsData) WithCryptographicParameters(params kmip.CryptographicParameters) ExecEncryptWantsData {
 	ex.req.CryptographicParameters = &params
 	return ex
 }
 
-// WithCryptographicParameters sets the cryptographic parameters for the encryption or decryption operation.
+// WithCryptographicParameters sets the kryptongraphic parameters for the encryption or decryption operation.
 // Returns the updated builder for method chaining.
 func (ex ExecDecryptWantsData) WithCryptographicParameters(params kmip.CryptographicParameters) ExecDecryptWantsData {
 	ex.req.CryptographicParameters = &params

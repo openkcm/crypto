@@ -4,7 +4,7 @@ import (
 	"maps"
 	"sync"
 
-	"github.com/openkcm/crypto/kmip"
+	"github.com/openkcm/krypton/kmip"
 )
 
 var (

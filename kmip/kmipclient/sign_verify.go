@@ -2,20 +2,20 @@ package kmipclient
 
 import (
 	"context"
-	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rsa"
 	"encoding/asn1"
 	"errors"
 	"fmt"
 	"io"
+	"krypton"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rsa"
 	"math"
 	"math/big"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 // ExecSign is a specialized executor for handling Sign operations.
@@ -29,7 +29,7 @@ import (
 //
 // Errors:
 //   - Errors may be returned when executing the sign operation if the key is invalid,
-//     the server rejects the operation, or the cryptographic parameters are not supported.
+//     the server rejects the operation, or the kryptongraphic parameters are not supported.
 type ExecSign struct {
 	Executor[*payloads.SignRequestPayload, *payloads.SignResponsePayload]
 }
@@ -45,7 +45,7 @@ type ExecSign struct {
 //
 // Errors:
 //   - Errors may be returned when executing the signature verify operation if the key is invalid,
-//     the server rejects the operation, or the cryptographic parameters are not supported.
+//     the server rejects the operation, or the kryptongraphic parameters are not supported.
 type ExecSignatureVerify struct {
 	Executor[*payloads.SignatureVerifyRequestPayload, *payloads.SignatureVerifyResponsePayload]
 }
@@ -111,10 +111,10 @@ func (ex ExecSignWantsData) DigestedData(data []byte) ExecSign {
 
 // SignatureVerify initializes a signature verification operation for the object identified by the given unique identifier.
 // It returns an ExecSignatureVerifyWantsData struct, which allows the caller to provide the data and signature to be verified.
-// The verification process is performed using the cryptographic object referenced by the unique identifier.
+// The verification process is performed using the kryptongraphic object referenced by the unique identifier.
 //
 // Parameters:
-//   - id: The unique identifier of the cryptographic object to be used for signature verification.
+//   - id: The unique identifier of the kryptongraphic object to be used for signature verification.
 //
 // Returns:
 //   - ExecSignatureVerifyWantsData: A struct for chaining the next steps of the signature verification process.
@@ -188,7 +188,7 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 	}
 }
 
-// Signer creates a crypto.Signer using the provided private and public key IDs.
+// Signer creates a krypton.Signer using the provided private and public key IDs.
 // It verifies the attributes of the keys to ensure they are suitable for signing and verifying operations.
 // If only one key ID is provided, it attempts to find the corresponding linked key ID.
 //
@@ -198,13 +198,13 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 //   - publicKeyId: The ID of the public key. Can be empty if privateKeyId is provided.
 //
 // Returns:
-//   - crypto.Signer: The signer object that can be used for signing operations.
+//   - krypton.Signer: The signer object that can be used for signing operations.
 //   - error: An error if the key attributes are invalid or if required keys are missing.
-func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
+func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (krypton.Signer, error) {
 	if privateKeyId == "" && publicKeyId == "" {
 		return nil, errors.New("at least one of public key or private key ID must be given")
 	}
-	signer := &cryptoSigner{
+	signer := &kryptonSigner{
 		client: c,
 	}
 
@@ -267,33 +267,33 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 	return signer, nil
 }
 
-type cryptoSigner struct {
+type kryptonSigner struct {
 	alg          kmip.CryptographicAlgorithm
 	privateKeyId string
-	publicKey    crypto.PublicKey
+	publicKey    krypton.PublicKey
 	client       *Client
 }
 
-// Public implements crypto.Signer.
-func (c *cryptoSigner) Public() crypto.PublicKey {
+// Public implements krypton.Signer.
+func (c *kryptonSigner) Public() krypton.PublicKey {
 	return c.publicKey
 }
 
-func hashToKmip(h crypto.Hash) (kmip.HashingAlgorithm, error) {
+func hashToKmip(h krypton.Hash) (kmip.HashingAlgorithm, error) {
 	switch h {
-	case crypto.SHA256:
+	case krypton.SHA256:
 		return kmip.HashingAlgorithmSHA_256, nil
-	case crypto.SHA384:
+	case krypton.SHA384:
 		return kmip.HashingAlgorithmSHA_384, nil
-	case crypto.SHA512:
+	case krypton.SHA512:
 		return kmip.HashingAlgorithmSHA_512, nil
 	default:
 		return 0, errors.New("unsupported hash function")
 	}
 }
 
-// Sign implements crypto.Signer.
-func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (signature []byte, err error) {
+// Sign implements krypton.Signer.
+func (c *kryptonSigner) Sign(rand io.Reader, digest []byte, opts krypton.SignerOpts) (signature []byte, err error) {
 	if opts == nil {
 		return nil, errors.New("opts cannot be nil")
 	}
@@ -364,7 +364,7 @@ func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpt
 	return resp.SignatureData, nil
 }
 
-func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string, expectedObjectType kmip.ObjectType, expectedUsageMask kmip.CryptographicUsageMask) (string, error) {
+func (c *kryptonSigner) verifySignerKeyAttributes(ctx context.Context, id string, expectedObjectType kmip.ObjectType, expectedUsageMask kmip.CryptographicUsageMask) (string, error) {
 	resp, err := c.client.GetAttributes(id,
 		kmip.AttributeNameObjectType,
 		kmip.AttributeNameCryptographicAlgorithm,
@@ -387,12 +387,12 @@ func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string,
 			// Save private key algorithm
 			alg := attr.AttributeValue.(kmip.CryptographicAlgorithm)
 			if alg != kmip.CryptographicAlgorithmRSA && alg != kmip.CryptographicAlgorithmEC && alg != kmip.CryptographicAlgorithmECDSA {
-				return "", fmt.Errorf("unsupported cryptographic algorithm %s", ttlv.EnumStr(alg))
+				return "", fmt.Errorf("unsupported kryptongraphic algorithm %s", ttlv.EnumStr(alg))
 			}
 			if c.alg == 0 {
 				c.alg = alg
 			} else if alg != c.alg {
-				return "", fmt.Errorf("invalid cryptographic algorithm %s", ttlv.EnumStr(alg))
+				return "", fmt.Errorf("invalid kryptongraphic algorithm %s", ttlv.EnumStr(alg))
 			}
 
 		case kmip.AttributeNameLink:
@@ -411,7 +411,7 @@ func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string,
 
 // convertRawECDSAToASN1DER converts a raw ECDSA signature (r || s) into ASN.1 DER format.
 func convertRawECDSAToASN1DER(rawSig []byte, curve elliptic.Curve) ([]byte, error) {
-	//TODO: Change maybe to use x/crypto's cryptobyte package which would be more performant, but would add a new dependency.
+	//TODO: Change maybe to use x/krypton's kryptonbyte package which would be more performant, but would add a new dependency.
 
 	// ECDSASignature represents the ASN.1 structure of an ECDSA signature
 	type ECDSASignature struct {

@@ -1,30 +1,30 @@
-{{- if .Values.encrypto.hpa.enabled }}
+{{- if .Values.enkrypton.hpa.enabled }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "crypto.fullname" . }}-encrypto
-  namespace: {{ include "crypto.namespace" . }}
+  name: {{ include "krypton.fullname" . }}-enkrypton
+  namespace: {{ include "krypton.namespace" . }}
   labels:
-    {{- include "crypto.encrypto.labels" . | nindent 4 }}
+    {{- include "krypton.enkrypton.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "crypto.fullname" . }}-encrypto
-  minReplicas: {{ .Values.encrypto.hpa.minReplicas }}
-  maxReplicas: {{ .Values.encrypto.hpa.maxReplicas }}
+    name: {{ include "krypton.fullname" . }}-enkrypton
+  minReplicas: {{ .Values.enkrypton.hpa.minReplicas }}
+  maxReplicas: {{ .Values.enkrypton.hpa.maxReplicas }}
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.encrypto.hpa.targetCPUUtilizationPercentage }}  # Target 70% CPU usage per pod
+          averageUtilization: {{ .Values.enkrypton.hpa.targetCPUUtilizationPercentage }}  # Target 70% CPU usage per pod
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.encrypto.hpa.targetMemoryUtilizationPercentage }}  # Target 80% Memory usage per pod
+          averageUtilization: {{ .Values.enkrypton.hpa.targetMemoryUtilizationPercentage }}  # Target 80% Memory usage per pod
 {{- end }}

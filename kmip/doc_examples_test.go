@@ -2,13 +2,13 @@ package kmip_test
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"krypton/rand"
 	"log"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
 )
 
 // Example demonstrates how to establish a connection to a KMIP server,

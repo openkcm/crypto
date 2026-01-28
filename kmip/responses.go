@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 type ResponseMessage struct {

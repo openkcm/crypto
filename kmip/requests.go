@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 type RequestMessage struct {

@@ -3,8 +3,8 @@ package kmipclient
 import (
 	"math"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // CreateKeyPair initializes and returns an ExecCreateKeyPair instance with default template attributes
@@ -48,13 +48,13 @@ type ExecCreateKeyPair struct {
 }
 
 // RSA configures the ExecCreateKeyPair to generate an RSA key pair with the specified bit length and usage masks.
-// It sets the cryptographic algorithm to RSA, assigns the provided bit length, and applies the given usage masks
+// It sets the kryptongraphic algorithm to RSA, assigns the provided bit length, and applies the given usage masks
 // to the public and private keys respectively. If the bit length is out of the valid int32 range, the function panics.
 //
 // Parameters:
 //   - bitlen: The length of the RSA key in bits.
-//   - privateUsage: The cryptographic usage mask for the private key.
-//   - publicUsage: The cryptographic usage mask for the public key.
+//   - privateUsage: The kryptongraphic usage mask for the private key.
+//   - publicUsage: The kryptongraphic usage mask for the public key.
 //
 // Returns:
 //   - ExecCreateKeyPairAttr: The configured key pair attributes for RSA key generation.
@@ -75,13 +75,13 @@ func (ex ExecCreateKeyPair) RSA(bitlen int, privateUsage, publicUsage kmip.Crypt
 }
 
 // ECDSA configures the ExecCreateKeyPair operation for generating an ECDSA key pair.
-// It sets the cryptographic algorithm to ECDSA, specifies the curve and its bit length,
-// and applies the provided cryptographic usage masks to the public and private keys.
+// It sets the kryptongraphic algorithm to ECDSA, specifies the curve and its bit length,
+// and applies the provided kryptongraphic usage masks to the public and private keys.
 //
 // Parameters:
 //   - curve: The recommended elliptic curve to use for key generation.
-//   - privateUsage: The cryptographic usage mask for the private key.
-//   - publicUsage: The cryptographic usage mask for the public key.
+//   - privateUsage: The kryptongraphic usage mask for the private key.
+//   - publicUsage: The kryptongraphic usage mask for the public key.
 //
 // Returns:
 //   - ExecCreateKeyPairAttr: The configured key pair creation attributes.

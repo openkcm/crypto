@@ -1,18 +1,18 @@
 package kmip
 
 import (
-	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"krypton"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rsa"
+	"krypton/x509"
 	"math/big"
 	"reflect"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 var objectTypes = map[ObjectType]reflect.Type{
@@ -166,7 +166,7 @@ func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 		return rk, nil
 	case KeyFormatTypeTransparentRSAPublicKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != RSA {
-		// 	return nil, errors.New("Invalid cryptographic algorithm")
+		// 	return nil, errors.New("Invalid kryptongraphic algorithm")
 		// }
 		mat, err := key.KeyBlock.GetMaterial()
 		if err != nil {
@@ -216,7 +216,7 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 		return rk, nil
 	case KeyFormatTypeTransparentECDSAPublicKey, KeyFormatTypeTransparentECPublicKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || (*alg != ECDSA && *alg != EC) {
-		// 	return nil, errors.New("Invalid cryptographic algorithm")
+		// 	return nil, errors.New("Invalid kryptongraphic algorithm")
 		// }
 		mat, err := key.KeyBlock.GetMaterial()
 		if err != nil {
@@ -270,8 +270,8 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 	}
 }
 
-// CryptoPublicKey parses and return the public key object into a go [crypto.PublicKey] object.
-func (key *PublicKey) CryptoPublicKey() (crypto.PublicKey, error) {
+// CryptoPublicKey parses and return the public key object into a go [krypton.PublicKey] object.
+func (key *PublicKey) CryptoPublicKey() (krypton.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeTransparentECPublicKey, KeyFormatTypeTransparentECDSAPublicKey:
 		return key.ECDSA()
@@ -339,7 +339,7 @@ func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 		return rk, nil
 	case KeyFormatTypeTransparentRSAPrivateKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != RSA {
-		// 	return nil, errors.New("Invalid cryptographic algorithm")
+		// 	return nil, errors.New("Invalid kryptongraphic algorithm")
 		// }
 		mat, err := key.KeyBlock.GetMaterial()
 		if err != nil {
@@ -410,7 +410,7 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 		return rk, nil
 	case KeyFormatTypeTransparentECDSAPrivateKey, KeyFormatTypeTransparentECPrivateKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != ECDSA {
-		// 	return nil, errors.New("Invalid cryptographic algorithm")
+		// 	return nil, errors.New("Invalid kryptongraphic algorithm")
 		// }
 		mat, err := key.KeyBlock.GetMaterial()
 		if err != nil {
@@ -450,8 +450,8 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 	}
 }
 
-// CryptoPrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
-func (key *PrivateKey) CryptoPrivateKey() (crypto.PrivateKey, error) {
+// CryptoPrivateKey parses and return the private key object into a go [krypton.PrivateKey] object.
+func (key *PrivateKey) CryptoPrivateKey() (krypton.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeECPrivateKey, KeyFormatTypeTransparentECPrivateKey, KeyFormatTypeTransparentECDSAPrivateKey:
 		return key.ECDSA()

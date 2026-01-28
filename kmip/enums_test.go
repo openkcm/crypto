@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestEnums(t *testing.T) {

@@ -1,7 +1,7 @@
 package kmipclient
 
 import (
-	"github.com/openkcm/crypto/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/payloads"
 )
 
 // Destroy creates an ExecDestroy operation for the specified unique identifier.

@@ -1,10 +1,10 @@
 package authorization
 
 import (
-	"crypto/x509"
+	"krypton/x509"
 
-	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/kmip"
+	"github.com/openkcm/krypton/internal/config"
+	"github.com/openkcm/krypton/kmip"
 )
 
 type certificateRequest struct {

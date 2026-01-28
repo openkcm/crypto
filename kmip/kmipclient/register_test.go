@@ -2,12 +2,12 @@ package kmipclient_test
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
+	"krypton/ecdsa"
+	"krypton/elliptic"
+	"krypton/rand"
+	"krypton/rsa"
+	"krypton/x509"
 	"math/big"
 	"net"
 	"testing"
@@ -15,12 +15,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/openkcm/crypto/kmip"
-	"github.com/openkcm/crypto/kmip/kmipclient"
-	"github.com/openkcm/crypto/kmip/kmipserver"
-	"github.com/openkcm/crypto/kmip/kmiptest"
-	"github.com/openkcm/crypto/kmip/payloads"
-	"github.com/openkcm/crypto/kmip/ttlv"
+	"github.com/openkcm/krypton/kmip"
+	"github.com/openkcm/krypton/kmip/kmipclient"
+	"github.com/openkcm/krypton/kmip/kmipserver"
+	"github.com/openkcm/krypton/kmip/kmiptest"
+	"github.com/openkcm/krypton/kmip/payloads"
+	"github.com/openkcm/krypton/kmip/ttlv"
 )
 
 func TestRegister_SecretString(t *testing.T) {
@@ -94,7 +94,7 @@ func TestRegister_Symmetric(t *testing.T) {
 				require.Equal(t, kmip.CryptographicAlgorithmAES, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
-				//TODO: Check attributes name and cryptographic usage mask
+				//TODO: Check attributes name and kryptongraphic usage mask
 				data, err := k.KeyMaterial()
 				require.NoError(t, err)
 				require.Equal(t, secret, string(data))
@@ -136,7 +136,7 @@ func TestRegister_PrivateKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.CryptographicAlgorithmRSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
-				//TODO: Check attributes name and cryptographic usage mask
+				//TODO: Check attributes name and kryptongraphic usage mask
 				data, err := k.RSA()
 				require.NoError(t, err)
 				require.Equal(t, rsaKey, data)
@@ -186,7 +186,7 @@ func TestRegister_PrivateKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.CryptographicAlgorithmECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
-				//TODO: Check attributes name and cryptographic usage mask
+				//TODO: Check attributes name and kryptongraphic usage mask
 				data, err := k.ECDSA()
 				require.NoError(t, err)
 				require.Equal(t, ecKey, data)
@@ -236,7 +236,7 @@ func TestRegister_PublicKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.CryptographicAlgorithmRSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
-				//TODO: Check attributes name and cryptographic usage mask
+				//TODO: Check attributes name and kryptongraphic usage mask
 				data, err := k.RSA()
 				require.NoError(t, err)
 				require.Equal(t, &rsaKey.PublicKey, data)
@@ -284,7 +284,7 @@ func TestRegister_PublicKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.CryptographicAlgorithmECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
-				//TODO: Check attributes name and cryptographic usage mask
+				//TODO: Check attributes name and kryptongraphic usage mask
 				data, err := k.ECDSA()
 				require.NoError(t, err)
 				require.Equal(t, &ecKey.PublicKey, data)
