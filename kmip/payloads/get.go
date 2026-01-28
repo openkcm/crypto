@@ -1,12 +1,12 @@
 package payloads
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/x509"
 	"errors"
 	"fmt"
-	"krypton"
-	"krypton/ecdsa"
-	"krypton/rsa"
-	"krypton/x509"
 
 	"github.com/openkcm/krypton/kmip"
 	"github.com/openkcm/krypton/kmip/ttlv"
@@ -161,12 +161,12 @@ func (pl *GetResponsePayload) EcdsaPrivateKey() (*ecdsa.PrivateKey, error) {
 }
 
 // PrivateKey parses and return the private key object into a go [krypton.PrivateKey] object.
-func (pl *GetResponsePayload) PrivateKey() (krypton.PrivateKey, error) {
+func (pl *GetResponsePayload) PrivateKey() (crypto.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
 	key, ok := pl.Object.(interface {
-		CryptoPrivateKey() (krypton.PrivateKey, error)
+		CryptoPrivateKey() (crypto.PrivateKey, error)
 	})
 	if !ok {
 		return nil, errors.New("Object does not implement CryptoPrivateKey() method")
@@ -213,12 +213,12 @@ func (pl *GetResponsePayload) EcdsaPublicKey() (*ecdsa.PublicKey, error) {
 }
 
 // PublicKey parses and return the public key object into a go [krypton.PublicKey] object.
-func (pl *GetResponsePayload) PublicKey() (krypton.PublicKey, error) {
+func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
 	key, ok := pl.Object.(interface {
-		CryptoPublicKey() (krypton.PublicKey, error)
+		CryptoPublicKey() (crypto.PublicKey, error)
 	})
 	if !ok {
 		return nil, errors.New("Object does not implement ECDSA() method")

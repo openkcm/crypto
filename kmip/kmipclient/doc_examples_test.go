@@ -2,11 +2,11 @@ package kmipclient_test
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"krypton/ecdsa"
-	"krypton/elliptic"
-	"krypton/rand"
 	"log"
 	"time"
 

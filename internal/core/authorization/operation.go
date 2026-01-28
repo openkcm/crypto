@@ -1,7 +1,7 @@
 package authorization
 
 import (
-	"krypton/x509"
+	"crypto/x509"
 
 	"github.com/openkcm/krypton/kmip"
 )

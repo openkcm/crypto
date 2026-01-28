@@ -41,11 +41,11 @@ package kmipclient
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
-	"krypton/tls"
-	"krypton/x509"
 	"net"
 	"os"
 	"slices"

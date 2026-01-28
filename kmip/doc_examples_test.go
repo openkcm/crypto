@@ -2,9 +2,9 @@ package kmip_test
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"krypton/rand"
 	"log"
 
 	"github.com/openkcm/krypton/kmip"

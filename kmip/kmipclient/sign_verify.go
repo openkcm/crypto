@@ -2,14 +2,14 @@ package kmipclient
 
 import (
 	"context"
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rsa"
 	"encoding/asn1"
 	"errors"
 	"fmt"
 	"io"
-	"krypton"
-	"krypton/ecdsa"
-	"krypton/elliptic"
-	"krypton/rsa"
 	"math"
 	"math/big"
 
@@ -200,7 +200,7 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 // Returns:
 //   - krypton.Signer: The signer object that can be used for signing operations.
 //   - error: An error if the key attributes are invalid or if required keys are missing.
-func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (krypton.Signer, error) {
+func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
 	if privateKeyId == "" && publicKeyId == "" {
 		return nil, errors.New("at least one of public key or private key ID must be given")
 	}
@@ -270,22 +270,22 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 type kryptonSigner struct {
 	alg          kmip.CryptographicAlgorithm
 	privateKeyId string
-	publicKey    krypton.PublicKey
+	publicKey    crypto.PublicKey
 	client       *Client
 }
 
 // Public implements krypton.Signer.
-func (c *kryptonSigner) Public() krypton.PublicKey {
+func (c *kryptonSigner) Public() crypto.PublicKey {
 	return c.publicKey
 }
 
-func hashToKmip(h krypton.Hash) (kmip.HashingAlgorithm, error) {
+func hashToKmip(h crypto.Hash) (kmip.HashingAlgorithm, error) {
 	switch h {
-	case krypton.SHA256:
+	case crypto.SHA256:
 		return kmip.HashingAlgorithmSHA_256, nil
-	case krypton.SHA384:
+	case crypto.SHA384:
 		return kmip.HashingAlgorithmSHA_384, nil
-	case krypton.SHA512:
+	case crypto.SHA512:
 		return kmip.HashingAlgorithmSHA_512, nil
 	default:
 		return 0, errors.New("unsupported hash function")
@@ -293,7 +293,7 @@ func hashToKmip(h krypton.Hash) (kmip.HashingAlgorithm, error) {
 }
 
 // Sign implements krypton.Signer.
-func (c *kryptonSigner) Sign(rand io.Reader, digest []byte, opts krypton.SignerOpts) (signature []byte, err error) {
+func (c *kryptonSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (signature []byte, err error) {
 	if opts == nil {
 		return nil, errors.New("opts cannot be nil")
 	}

@@ -2,12 +2,12 @@ package kmipclient_test
 
 import (
 	"context"
-	"krypton"
-	"krypton/ecdsa"
-	"krypton/elliptic"
-	"krypton/rand"
-	"krypton/rsa"
-	"krypton/x509"
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -77,14 +77,14 @@ func TestCryptoSignerRSA(t *testing.T) {
 
 		switch pl.UniqueIdentifier {
 		case "private-key-rsa":
-			var hash krypton.Hash
+			var hash crypto.Hash
 			switch pl.CryptographicParameters.HashingAlgorithm {
 			case kmip.HashingAlgorithmSHA_256:
-				hash = krypton.SHA256
+				hash = crypto.SHA256
 			case kmip.HashingAlgorithmSHA_384:
-				hash = krypton.SHA384
+				hash = crypto.SHA384
 			case kmip.HashingAlgorithmSHA_512:
-				hash = krypton.SHA512
+				hash = crypto.SHA512
 			}
 			switch pl.CryptographicParameters.PaddingMethod {
 			case kmip.PaddingMethodPKCS1V1_5:
@@ -121,7 +121,7 @@ func TestCryptoSignerRSA(t *testing.T) {
 	signer, err := client.Signer(context.Background(), "", "public-key-rsa")
 	require.NoError(t, err)
 
-	for _, hashfunc := range []krypton.Hash{krypton.SHA256, krypton.SHA384, krypton.SHA512} {
+	for _, hashfunc := range []crypto.Hash{crypto.SHA256, crypto.SHA384, crypto.SHA512} {
 		t.Run(hashfunc.String(), func(t *testing.T) {
 			h := hashfunc.New()
 			h.Write(data)
@@ -251,7 +251,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 
 			data := []byte("hello world")
 
-			for _, hashfunc := range []krypton.Hash{krypton.SHA256, krypton.SHA384, krypton.SHA512} {
+			for _, hashfunc := range []crypto.Hash{crypto.SHA256, crypto.SHA384, crypto.SHA512} {
 				t.Run(hashfunc.String(), func(t *testing.T) {
 					h := hashfunc.New()
 					h.Write(data)

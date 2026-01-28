@@ -3,12 +3,12 @@ package kmiphandlers
 import (
 	"bytes"
 	"context"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"io"
-	"krypton/x509"
 	"net/http"
 
 	"github.com/openkcm/krypton/internal/core"

@@ -2,9 +2,9 @@ package kmipserver
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
-	"krypton/tls"
-	"krypton/x509"
 	"net/http"
 
 	"github.com/openkcm/krypton/kmip"

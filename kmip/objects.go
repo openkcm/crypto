@@ -1,14 +1,14 @@
 package kmip
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"krypton"
-	"krypton/ecdsa"
-	"krypton/elliptic"
-	"krypton/rsa"
-	"krypton/x509"
 	"math/big"
 	"reflect"
 
@@ -271,7 +271,7 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 }
 
 // CryptoPublicKey parses and return the public key object into a go [krypton.PublicKey] object.
-func (key *PublicKey) CryptoPublicKey() (krypton.PublicKey, error) {
+func (key *PublicKey) CryptoPublicKey() (crypto.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeTransparentECPublicKey, KeyFormatTypeTransparentECDSAPublicKey:
 		return key.ECDSA()
@@ -451,7 +451,7 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 }
 
 // CryptoPrivateKey parses and return the private key object into a go [krypton.PrivateKey] object.
-func (key *PrivateKey) CryptoPrivateKey() (krypton.PrivateKey, error) {
+func (key *PrivateKey) CryptoPrivateKey() (crypto.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeECPrivateKey, KeyFormatTypeTransparentECPrivateKey, KeyFormatTypeTransparentECDSAPrivateKey:
 		return key.ECDSA()

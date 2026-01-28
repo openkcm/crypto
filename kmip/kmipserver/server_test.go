@@ -2,8 +2,8 @@ package kmipserver_test
 
 import (
 	"context"
-	"krypton/tls"
-	"krypton/x509"
+	"crypto/tls"
+	"crypto/x509"
 	"sync"
 	"testing"
 	"time"

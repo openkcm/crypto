@@ -2,12 +2,12 @@ package kmipclient_test
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/pem"
-	"krypton/ecdsa"
-	"krypton/elliptic"
-	"krypton/rand"
-	"krypton/rsa"
-	"krypton/x509"
 	"math/big"
 	"net"
 	"testing"
