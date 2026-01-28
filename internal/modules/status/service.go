@@ -3,12 +3,12 @@ package status
 import (
 	"context"
 
+	"github.com/openkcm/common-sdk/pkg/status"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/openkcm/crypto/internal/config"
-	"github.com/openkcm/crypto/internal/modules"
 	"github.com/openkcm/crypto/pkg/concurrent"
 	"github.com/openkcm/crypto/pkg/module"
 )
@@ -49,14 +49,12 @@ func (s *statusModule) RunServe(ctxStartup, ctxShutdown context.Context, shutdow
 	}
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
-		s.serveStatusServer,
+		func(ctx context.Context) error {
+			return status.Serve(ctx, &s.config.BaseConfig)
+		},
 	)
 	if err != nil {
 		return oops.In(moduleName).Wrapf(err, "Failed to server kmip server")
 	}
 	return nil
-}
-
-func (s *statusModule) serveStatusServer(ctx context.Context) error {
-	return modules.ServeStatus(ctx, &s.config.BaseConfig)
 }
