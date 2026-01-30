@@ -12,26 +12,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "krypton.fullname" . }}-enkrypton
+  name: {{ include "krypton.fullname" . }}-krypton
   namespace: {{ include "krypton.namespace" . }}
   labels:
-    {{- include "krypton.enkrypton.labels" . | nindent 4 }}
+    {{- include "krypton.core.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.enkrypton.hpa.enabled }}
-  replicas: {{ .Values.enkrypton.hpa.minReplicas }}
+  {{- if .Values.krypton.hpa.enabled }}
+  replicas: {{ .Values.krypton.hpa.minReplicas }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "krypton.enkrypton.selectorLabels" . | nindent 6 }}
+      {{- include "krypton.core.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.enkrypton.pod.annotations }}
+      {{- with .Values.krypton.pod.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "krypton.enkrypton.labels" . | nindent 8 }}
-        {{- with .Values.enkrypton.pod.labels }}
+        {{- include "krypton.core.labels" . | nindent 8 }}
+        {{- with .Values.krypton.pod.labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -40,7 +40,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "krypton.serviceAccountName" . }}
-      {{- with .Values.enkrypton.pod.securityContext }}
+      {{- with .Values.krypton.pod.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -48,7 +48,7 @@ spec:
         {{- with .Values.common.extraContainers }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.enkrypton.extraContainers }}
+        {{- with .Values.krypton.extraContainers }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
         - name: {{ include "krypton.name" . }}
@@ -62,9 +62,9 @@ spec:
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          args: ["enkrypton"]
+          args: ["krypton"]
           ports:
-            {{- with .Values.enkrypton.extraPorts }}
+            {{- with .Values.krypton.extraPorts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
@@ -84,30 +84,30 @@ spec:
             {{- with .Values.common.extraEnvs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.enkrypton.extraEnvs }}
+            {{- with .Values.krypton.extraEnvs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- if gt (len $mergedEnkryptonExtraEnvsFrom) 0 }}
           envFrom:
           {{- $mergedEnkryptonExtraEnvsFrom | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.enkrypton.livenessProbe }}
+          {{- with .Values.krypton.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.enkrypton.readinessProbe }}
+          {{- with .Values.krypton.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.enkrypton.resources }}
+          {{- with .Values.krypton.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: {{ include "krypton.name" . }}-config-volume
-              mountPath: /etc/enkrypton
+              mountPath: /etc/krypton
               readOnly: true
-          {{- with .Values.enkrypton.extraVolumeMounts }}
+          {{- with .Values.krypton.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.common.extraVolumeMounts }}
@@ -116,26 +116,26 @@ spec:
       volumes:
         - name: {{ include "krypton.name" . }}-config-volume
           configMap:
-            name: {{ include "krypton.name" . }}-enkrypton-config
-      {{- with .Values.enkrypton.extraVolumes }}
+            name: {{ include "krypton.name" . }}-krypton-config
+      {{- with .Values.krypton.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.common.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enkrypton.pod.nodeSelector }}
+      {{- with .Values.krypton.pod.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enkrypton.pod.affinity }}
+      {{- with .Values.krypton.pod.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enkrypton.pod.topologySpreadConstraints }}
+      {{- with .Values.krypton.pod.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with .Values.enkrypton.pod.tolerations }}
+      {{- with .Values.krypton.pod.tolerations }}
       tolerations:
         {{- toYaml . | nindent 6 }}
       {{- end }}

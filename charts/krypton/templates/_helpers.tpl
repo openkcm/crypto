@@ -57,9 +57,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Enkrypton Selector labels
 */}}
-{{- define "krypton.enkrypton.labels" -}}
+{{- define "krypton.core.labels" -}}
 {{ include "krypton.labels" . }}
-{{ include "krypton.name" . }}.openkcm.io/component: enkrypton
+{{ include "krypton.name" . }}.openkcm.io/component: krypton
 {{- end }}
 
 {{/*
@@ -83,9 +83,9 @@ app.kubernetes.io/component: {{ .Chart.Name }}
 {{/*
 Enkrypton Selector labels
 */}}
-{{- define "krypton.enkrypton.selectorLabels" -}}
+{{- define "krypton.core.selectorLabels" -}}
 {{ include "krypton.selectorLabels" . }}
-{{ include "krypton.name" . }}.openkcm.io/component: enkrypton
+{{ include "krypton.name" . }}.openkcm.io/component: krypton
 {{- end }}
 
 {{/*

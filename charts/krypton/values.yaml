@@ -94,7 +94,7 @@ common:
   extraVolumeMounts: [ ]
 
 # Enkrypton module configuration
-enkrypton:
+krypton:
   pod:
     # This is for setting Kubernetes Annotations to a Pod.
     # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
@@ -336,7 +336,7 @@ config:
     # Labels associated to metrics, traces and logs
     labels: { }
 
-  enkrypton:
+  krypton:
     # Logger configuration
     logger:
       level: debug # one of: debug, info, warn, error
