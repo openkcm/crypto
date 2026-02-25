@@ -1,10 +1,10 @@
-# OpenKCM: Crypto
+# OpenKCM: Krypton
 
 [![REUSE status](https://api.reuse.software/badge/github.com/openkcm/krypton)](https://api.reuse.software/info/github.com/openkcm/krypton)
 
 ## About this project
 
-OpenKCM Crypto is a manging key materials!.
+OpenKCM Krypton is a manging key materials.
 
 ## Support, Feedback, Contributing
 
