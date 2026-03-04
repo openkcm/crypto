@@ -1,17 +1,124 @@
 package memvault_test
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/openkcm/krypton/internal/memvault"
 )
 
-func TestInit(t *testing.T) {
+func TestExampleEncryption(t *testing.T) {
+	// 32-byte masterKey for AES-256
+	masterKey := []byte("passphrasewhichneedstobe32bytes!")
+	nonce := []byte("unique_nonce")
+	clearText := []byte("...encrypted_data...")
+
+	vaultMasterKey, err := memvault.NewWithSecret(masterKey)
+	require.NoError(t, err)
+
+	defer vaultMasterKey.Wipe()
+
+	block, err := aes.NewCipher(vaultMasterKey.Bytes())
+	require.NoError(t, err)
+
+	aesGCM, err := cipher.NewGCM(block)
+	require.NoError(t, err)
+
+	encryptedStore, err := memvault.NewWithCapacity(36)
+	require.NoError(t, err)
+	defer encryptedStore.Wipe()
+
+	_ = aesGCM.Seal(encryptedStore.Bytes()[:0], nonce, clearText, nil)
+
+	// this is the place we have decrypted data
+	decryptedStore, err := memvault.NewWithCapacity(len(clearText))
+	assert.NoError(t, err)
+	defer decryptedStore.Wipe()
+
+	_, err = aesGCM.Open(decryptedStore.Bytes()[:0], nonce, encryptedStore.Bytes(), nil)
+	assert.NoError(t, err)
+
+	assert.NoError(t, err)
+	assert.Equal(t, clearText, decryptedStore.Bytes())
+}
+
+func TestExampleEncryption2(t *testing.T) {
+	veryImportantSecret := []byte("passphrasewhichneedstobe32bytes!")
+	nonce := []byte("unique_nonce")
+	clearText := []byte("...encrypted_data...")
+
+	vaultMasterKey, err := memvault.NewWithSecret(veryImportantSecret)
+	require.NoError(t, err)
+
+	var aesGCM cipher.AEAD
+	err = vaultMasterKey.ReadAndWipe(func(data []byte) error {
+		block, err := aes.NewCipher(vaultMasterKey.Bytes())
+		require.NoError(t, err)
+
+		aesGCM, err = cipher.NewGCM(block)
+		require.NoError(t, err)
+		return nil
+	})
+	require.NoError(t, err)
+
+	encryptedStore, err := memvault.NewWithCapacity(36)
+	require.NoError(t, err)
+	defer encryptedStore.Wipe()
+
+	err = encryptedStore.Read(func(data []byte) error {
+		encrypted := aesGCM.Seal(data[:0], nonce, clearText, nil)
+		fmt.Printf("%s\n", string(encrypted))
+
+		return nil
+	})
+	assert.NoError(t, err)
+
+	secureStore, err := memvault.NewWithCapacity(len(clearText))
+	assert.NoError(t, err)
+
+	err = secureStore.ReadAndWipe(func(secureData []byte) error {
+		err = encryptedStore.ReadAndWipe(func(encryptedData []byte) error {
+			_, err = aesGCM.Open(secureData[:0], nonce, encryptedData, nil)
+
+			assert.NoError(t, err)
+			assert.Equal(t, clearText, secureData)
+			return err
+		})
+		return err
+	})
+
+	require.NoError(t, err)
+}
+
+func TestWithCapacity(t *testing.T) {
+	t.Run("should return error if the input is zero", func(t *testing.T) {
+		// when
+		vault, err := memvault.NewWithCapacity(0)
+
+		// then
+		assert.ErrorIs(t, err, memvault.ErrInvalidInput)
+		assert.Nil(t, vault)
+	})
+
+	t.Run("should return error if the input is less than zero", func(t *testing.T) {
+		// when
+		vault, err := memvault.NewWithCapacity(-1)
+
+		// then
+		assert.ErrorIs(t, err, memvault.ErrInvalidInput)
+		assert.Nil(t, vault)
+	})
+}
+
+func TestNewWithSecret(t *testing.T) {
 	t.Run("should return error if the input is nil", func(t *testing.T) {
 		// when
-		vault, err := memvault.New(nil)
+		vault, err := memvault.NewWithSecret(nil)
 		// then
 		assert.ErrorIs(t, err, memvault.ErrInvalidInput)
 		assert.Nil(t, vault)
@@ -22,7 +129,7 @@ func TestInit(t *testing.T) {
 		input := []byte("secret")
 
 		// when
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 
 		// then
 		assert.NoError(t, err)
@@ -34,7 +141,7 @@ func TestInit(t *testing.T) {
 		input := []byte("secret")
 
 		// when
-		_, err := memvault.New(input)
+		_, err := memvault.NewWithSecret(input)
 
 		// then
 		assert.NoError(t, err)
@@ -46,7 +153,7 @@ func TestRead(t *testing.T) {
 	t.Run("should able to read multiple times from the vault", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -64,7 +171,7 @@ func TestRead(t *testing.T) {
 	t.Run("should return error if the input function returns error", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -81,7 +188,7 @@ func TestWipe(t *testing.T) {
 	t.Run("should be able to wipe the secret", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -94,7 +201,7 @@ func TestWipe(t *testing.T) {
 	t.Run("should be able to wipe secrets multiple times", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		for range 2 {
@@ -109,7 +216,7 @@ func TestWipe(t *testing.T) {
 	t.Run("should not be able to read secrets after a wipe", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		err = vault.Wipe()
@@ -130,7 +237,7 @@ func TestReadAndWipe(t *testing.T) {
 	t.Run("should be able to ReadAndWipe the secret", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -147,7 +254,7 @@ func TestReadAndWipe(t *testing.T) {
 	t.Run("should return error if the input function returns error", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -162,7 +269,7 @@ func TestReadAndWipe(t *testing.T) {
 	t.Run("should not be able read secrets if the input function returned an error first time", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		// when
@@ -184,7 +291,7 @@ func TestReadAndWipe(t *testing.T) {
 	t.Run("should not be able to read secrets after a ReadAndWipe", func(t *testing.T) {
 		// given
 		input := []byte("secret")
-		vault, err := memvault.New(input)
+		vault, err := memvault.NewWithSecret(input)
 		assert.NoError(t, err)
 
 		err = vault.ReadAndWipe(func(data []byte) error {

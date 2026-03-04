@@ -20,28 +20,31 @@ var (
 	ErrInvalidInput = errors.New("invalid input: data cannot be nil or empty")
 )
 
-// New creates a new MemVault by copying the provided data into locked memory.
-// The original data slice is securely cleared after copying.
-// Returns a pointer to the MemVault or an error if input is invalid or memory allocation fails.
-func New(data []byte) (*MemVault, error) {
-	if len(data) == 0 {
-		return nil, ErrInvalidInput
-	}
-
-	lockedBytes, err := initLockedMem(len(data))
+func NewWithSecret(data []byte) (*MemVault, error) {
+	vault, err := NewWithCapacity(len(data))
 	if err != nil {
 		return nil, err
 	}
 
-	copy(lockedBytes, data)
+	copy(vault.data, data)
 	clearBytes(data)
+
+	return vault, nil
+}
+
+func NewWithCapacity(size int) (*MemVault, error) {
+	if size <= 0 {
+		return nil, ErrInvalidInput
+	}
+
+	lockedBytes, err := initLockedMem(size)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MemVault{data: lockedBytes}, nil
 }
 
-// Read provides read-only access to the vault's data by invoking the given function
-// with the current data slice. If the vault has been wiped, it returns ErrVaultWiped.
-// The provided function should not modify the data slice.
 func (v *MemVault) Read(fn func(data []byte) error) error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
@@ -52,10 +55,10 @@ func (v *MemVault) Read(fn func(data []byte) error) error {
 	return fn(v.data)
 }
 
-// ReadAndWipe provides access to the vault's data by invoking the given function
-// with the current data slice, then securely wipes the data from memory.
-// If the vault has already been wiped, it returns ErrVaultWiped.
-// Returns a combined error from the provided function and the wipe operation, if any.
+func (v *MemVault) Bytes() []byte {
+	return v.data
+}
+
 func (v *MemVault) ReadAndWipe(fn func(data []byte) error) error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
@@ -91,9 +94,6 @@ func (v *MemVault) wipe() error {
 	return freeLockedMem(v.data)
 }
 
-// initLockedMem allocates a slice of memory of the given size using mmap,
-// and locks it into RAM to prevent it from being swapped to disk.
-// Returns the allocated byte slice or an error if allocation or locking fails.
 func initLockedMem(size int) ([]byte, error) {
 	b, err := unix.Mmap(
 		-1,                             // no file
@@ -116,9 +116,6 @@ func initLockedMem(size int) ([]byte, error) {
 	return b, nil
 }
 
-// freeLockedMem unlocks and frees a previously locked memory region.
-// It first unlocks the memory to allow it to be swapped out, then unmaps it to release the memory.
-// Returns an error if either operation fails.
 func freeLockedMem(b []byte) error {
 	// unlock the memory to allow it to be swapped out again
 	err := unix.Munlock(b)
@@ -134,8 +131,6 @@ func freeLockedMem(b []byte) error {
 	return nil
 }
 
-// clearBytes securely zeroes out the contents of the given byte slice.
-// This is used to clear sensitive information from memory.
 func clearBytes(b []byte) {
 	for i := range b {
 		b[i] = 0 // zero out the original data to clear sensitive information
