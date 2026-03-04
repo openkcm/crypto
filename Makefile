@@ -20,3 +20,10 @@ test: clean
 
 	@echo "On a Mac, you can use the following command to open the coverage report in the browser\ngo tool cover -html=cover.out -o cover.html && open cover.html"
 
+CLI_TOOL_NAME := kr
+
+.PHONY: cli
+cli:
+	@go build -o $(CLI_TOOL_NAME) ./cli
+	@mv $(CLI_TOOL_NAME) $(shell go env GOPATH)/bin/
+	@echo "use $(CLI_TOOL_NAME) to interact with krypton"
