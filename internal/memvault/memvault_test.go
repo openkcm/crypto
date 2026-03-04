@@ -13,17 +13,17 @@ import (
 )
 
 func TestExampleEncryption(t *testing.T) {
-	// 32-byte masterKey for AES-256
-	masterKey := []byte("passphrasewhichneedstobe32bytes!")
+	// 32-byte mainKey for AES-256
+	mainKey := []byte("passphrasewhichneedstobe32bytes!")
 	nonce := []byte("unique_nonce")
 	clearText := []byte("...encrypted_data...")
 
-	vaultMasterKey, err := memvault.NewWithSecret(masterKey)
+	vaultMainKey, err := memvault.NewWithSecret(mainKey)
 	require.NoError(t, err)
 
-	defer vaultMasterKey.Wipe()
+	defer vaultMainKey.Wipe()
 
-	block, err := aes.NewCipher(vaultMasterKey.Bytes())
+	block, err := aes.NewCipher(vaultMainKey.Bytes())
 	require.NoError(t, err)
 
 	aesGCM, err := cipher.NewGCM(block)
@@ -52,12 +52,12 @@ func TestExampleEncryption2(t *testing.T) {
 	nonce := []byte("unique_nonce")
 	clearText := []byte("...encrypted_data...")
 
-	vaultMasterKey, err := memvault.NewWithSecret(veryImportantSecret)
+	vaultMainKey, err := memvault.NewWithSecret(veryImportantSecret)
 	require.NoError(t, err)
 
 	var aesGCM cipher.AEAD
-	err = vaultMasterKey.ReadAndWipe(func(data []byte) error {
-		block, err := aes.NewCipher(vaultMasterKey.Bytes())
+	err = vaultMainKey.ReadAndWipe(func(data []byte) error {
+		block, err := aes.NewCipher(vaultMainKey.Bytes())
 		require.NoError(t, err)
 
 		aesGCM, err = cipher.NewGCM(block)
