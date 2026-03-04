@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/aes"
 	"fmt"
+	"runtime"
+	"runtime/secret"
 	"time"
 
 	"github.com/openkcm/krypton/internal/memvault"
@@ -18,10 +20,12 @@ func main() {
 	}
 
 	process(vaultMainKey.Bytes())
-	_, err = aes.NewCipher(vaultMainKey.Bytes())
-	if err != nil {
-		panic(err)
-	}
+	secret.Do(func() {
+		_, err = aes.NewCipher(vaultMainKey.Bytes())
+		if err != nil {
+			panic(err)
+		}
+	})
 
 	err = vaultMainKey.Wipe()
 	if err != nil {
@@ -31,6 +35,8 @@ func main() {
 	fmt.Println("wipe finished")
 
 	for {
+		runtime.GC()
+		fmt.Println("GC finished")
 		time.Sleep(10 * time.Second)
 	}
 }
