@@ -14,7 +14,7 @@ test: clean
 	@go clean -testcache
 
 	go test -count=1 -race -cover ./... -args -test.gocoverdir="${PWD}/cover/unit"
-	GOCOVERDIR="${PWD}/cover/integration" go test -count=1 -race --tags=integration ./integration
+	GOCOVERDIR="${PWD}/cover/integration" go test -count=1 -race ./integration
 
 	@go tool covdata textfmt -i=./cover/unit,./cover/integration -o cover.out
 

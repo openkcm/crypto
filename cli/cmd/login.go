@@ -1,53 +1,63 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/openkcm/krypton/pkg/auth"
-	"github.com/openkcm/krypton/pkg/auth/provider"
-	"github.com/openkcm/krypton/pkg/auth/store"
+	"github.com/openkcm/krypton/pkg/authn"
+	"github.com/openkcm/krypton/pkg/authn/provider"
+	"github.com/openkcm/krypton/pkg/authn/store"
 	"github.com/spf13/cobra"
 )
 
 func loginCmd() *cobra.Command {
-	var authenticator []byte
-	var authProvider auth.Provider
-	var authStore auth.Store
+	var credentials *authn.Credentials
+	var authProvider authn.Provider
+	var authStore authn.Store
 
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login to Krypton",
 		Long:  "Authenticate with the Krypton server to obtain access.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// Declare authenticator from flags.
-			// Declare auth provider and store based on flags (currently using no-op implementations).
+			// Declare credentials from flags (currently credentials are ignored in the no-op provider).
+
+			// Declare authn provider and store based on flags (currently using no-op and fs implementations by default).
 			authProvider = &provider.NoOp{}
-			authStore = &store.NoOp{}
+			store, err := store.NewFS()
+			if err != nil {
+				return err
+			}
+			authStore = store
 
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			assertion, err := authStore.Get()
+			ctx := cmd.Context()
+
+			token, err := authStore.Get(ctx)
+			if err != nil && !errors.Is(err, authn.ErrTokenNotFound) {
+				return err
+			}
+
+			if token != nil {
+				validationResult, err := authProvider.Validate(ctx, token)
+				if err != nil {
+					return err
+				}
+
+				if validationResult.Status == authn.ValidStatus {
+					fmt.Println("Already logged in.")
+					return nil
+				}
+			}
+
+			token, err = authProvider.Verify(ctx, credentials)
 			if err != nil {
 				return err
 			}
 
-			validationResult, err := authProvider.Validate(assertion)
-			if err != nil {
-				return err
-			}
-
-			if validationResult == auth.Valid {
-				fmt.Println("Already logged in.")
-				return nil
-			}
-
-			assertion, err = authProvider.Verify(authenticator)
-			if err != nil {
-				return err
-			}
-
-			err = authStore.Store(assertion)
+			err = authStore.Store(ctx, token)
 			if err != nil {
 				return err
 			}
