@@ -1,6 +1,7 @@
 package memvault_test
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
@@ -12,11 +13,47 @@ import (
 	"github.com/openkcm/krypton/internal/memvault"
 )
 
+func TestA(t *testing.T) {
+	nonce := []byte("unique_nonce")
+	clearText := []byte("...clearText...")
+
+	err := memvault.Run(t.Context(), func(ctx context.Context, vaultMainKey *memvault.MemVault) error {
+		err := vaultMainKey.WithSecret([]byte("passphrasewhichneedstobe32bytes!"))
+		require.NoError(t, err)
+
+		block, err := aes.NewCipher(vaultMainKey.Bytes())
+		require.NoError(t, err)
+
+		aesGCM, err := cipher.NewGCM(block)
+		require.NoError(t, err)
+
+		return memvault.Run(ctx, func(ctx context.Context, encryptedStore *memvault.MemVault) error {
+			err = encryptedStore.WithSize(31)
+			require.NoError(t, err)
+
+			aesGCM.Seal(encryptedStore.Bytes()[:0], nonce, clearText, nil)
+
+			return memvault.Run(ctx, func(ctx context.Context, decryptedStore *memvault.MemVault) error {
+				err := decryptedStore.WithSize(len(clearText))
+				require.NoError(t, err)
+
+				_, err = aesGCM.Open(decryptedStore.Bytes()[:0], nonce, encryptedStore.Bytes(), nil)
+				assert.NoError(t, err)
+
+				assert.Equal(t, clearText, decryptedStore.Bytes())
+				return nil
+			})
+		})
+	})
+
+	assert.NoError(t, err)
+}
+
 func TestExampleEncryption(t *testing.T) {
 	// 32-byte mainKey for AES-256
-	mainKey := []byte("passphrasewhichneedstobe32bytes!")
 	nonce := []byte("unique_nonce")
-	clearText := []byte("...encrypted_data...")
+	clearText := []byte(" ...clearText...")
+	mainKey := []byte("passphrasewhichneedstobe32bytes!")
 
 	vaultMainKey, err := memvault.NewWithSecret(mainKey)
 	require.NoError(t, err)
@@ -29,14 +66,14 @@ func TestExampleEncryption(t *testing.T) {
 	aesGCM, err := cipher.NewGCM(block)
 	require.NoError(t, err)
 
-	encryptedStore, err := memvault.NewWithCapacity(36)
+	encryptedStore, err := memvault.NewWithSize(36)
 	require.NoError(t, err)
 	defer encryptedStore.Wipe()
 
 	_ = aesGCM.Seal(encryptedStore.Bytes()[:0], nonce, clearText, nil)
 
 	// this is the place we have decrypted data
-	decryptedStore, err := memvault.NewWithCapacity(len(clearText))
+	decryptedStore, err := memvault.NewWithSize(len(clearText))
 	assert.NoError(t, err)
 	defer decryptedStore.Wipe()
 
@@ -66,7 +103,7 @@ func TestExampleEncryption2(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	encryptedStore, err := memvault.NewWithCapacity(36)
+	encryptedStore, err := memvault.NewWithSize(36)
 	require.NoError(t, err)
 	defer encryptedStore.Wipe()
 
@@ -78,7 +115,7 @@ func TestExampleEncryption2(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	secureStore, err := memvault.NewWithCapacity(len(clearText))
+	secureStore, err := memvault.NewWithSize(len(clearText))
 	assert.NoError(t, err)
 
 	err = secureStore.ReadAndWipe(func(secureData []byte) error {
@@ -98,7 +135,7 @@ func TestExampleEncryption2(t *testing.T) {
 func TestWithCapacity(t *testing.T) {
 	t.Run("should return error if the input is zero", func(t *testing.T) {
 		// when
-		vault, err := memvault.NewWithCapacity(0)
+		vault, err := memvault.NewWithSize(0)
 
 		// then
 		assert.ErrorIs(t, err, memvault.ErrInvalidInput)
@@ -107,7 +144,7 @@ func TestWithCapacity(t *testing.T) {
 
 	t.Run("should return error if the input is less than zero", func(t *testing.T) {
 		// when
-		vault, err := memvault.NewWithCapacity(-1)
+		vault, err := memvault.NewWithSize(-1)
 
 		// then
 		assert.ErrorIs(t, err, memvault.ErrInvalidInput)

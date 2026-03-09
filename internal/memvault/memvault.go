@@ -3,8 +3,10 @@
 package memvault
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 
 	"golang.org/x/sys/unix"
@@ -15,13 +17,69 @@ type MemVault struct {
 	mux  sync.Mutex
 }
 
+type SecureHandler func(context.Context, *MemVault) error
+
 var (
-	ErrVaultWiped   = errors.New("vault is wiped")
-	ErrInvalidInput = errors.New("invalid input: data cannot be nil or empty")
+	ErrVaultWiped          = errors.New("vault is wiped")
+	ErrInvalidInput        = errors.New("invalid input: data cannot be nil or empty")
+	ErrVaultAlreadyHasData = errors.New("vault already has data, wipe it before setting new data")
 )
 
+func New() *MemVault {
+	return &MemVault{}
+}
+
+func (v *MemVault) WithSize(size int) error {
+	if len(v.data) != 0 {
+		return ErrVaultAlreadyHasData
+	}
+
+	if size <= 0 {
+		return ErrInvalidInput
+	}
+
+	lockedBytes, err := initLockedMem(size)
+	if err != nil {
+		return err
+	}
+	v.data = lockedBytes
+	return nil
+}
+
+func (v *MemVault) WithSecret(data []byte) error {
+	if len(v.data) != 0 {
+		return ErrVaultAlreadyHasData
+	}
+
+	err := v.WithSize(len(data))
+	if err != nil {
+		return err
+	}
+
+	copy(v.data, data)
+	clearBytes(data)
+
+	return nil
+}
+
+func Run(ctx context.Context, handler ...SecureHandler) error {
+	for _, h := range handler {
+		vault := New()
+		defer func() {
+			err := vault.Wipe()
+			log.Printf("vault wipe error: %v", err)
+		}()
+
+		err := h(ctx, vault)
+		if err != nil {
+			return fmt.Errorf("handler error: %w", err)
+		}
+	}
+	return nil
+}
+
 func NewWithSecret(data []byte) (*MemVault, error) {
-	vault, err := NewWithCapacity(len(data))
+	vault, err := NewWithSize(len(data))
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +90,7 @@ func NewWithSecret(data []byte) (*MemVault, error) {
 	return vault, nil
 }
 
-func NewWithCapacity(size int) (*MemVault, error) {
+func NewWithSize(size int) (*MemVault, error) {
 	if size <= 0 {
 		return nil, ErrInvalidInput
 	}
