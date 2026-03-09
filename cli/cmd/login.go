@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/openkcm/krypton/pkg/authn"
 	"github.com/openkcm/krypton/pkg/authn/provider"
 	"github.com/openkcm/krypton/pkg/authn/store"
-	"github.com/spf13/cobra"
 )
 
 func loginCmd() *cobra.Command {

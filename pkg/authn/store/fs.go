@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/openkcm/krypton/pkg/authn"
 )
@@ -20,7 +19,6 @@ const (
 // FS is a filesystem-based implementation of authn.Store.
 // It stores tokens as JSON files on disk in the user's home directory under Directory.
 type FS struct {
-	mu        sync.RWMutex
 	dirPath   string
 	tokenPath string
 }
@@ -52,9 +50,6 @@ func (f *FS) Store(ctx context.Context, t *authn.Token) error {
 		return authn.ErrTokenNil
 	}
 
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
 	data, err := json.Marshal(t)
 	if err != nil {
 		return err
@@ -72,9 +67,6 @@ func (f *FS) Store(ctx context.Context, t *authn.Token) error {
 
 // Get retrieves the token from the filesystem.
 func (f *FS) Get(ctx context.Context) (*authn.Token, error) {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
 	data, err := os.ReadFile(f.tokenPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -93,9 +85,6 @@ func (f *FS) Get(ctx context.Context) (*authn.Token, error) {
 
 // Delete removes the token file from the filesystem.
 func (f *FS) Delete(ctx context.Context) error {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
 	err := os.Remove(f.tokenPath)
 	if err != nil && !os.IsNotExist(err) {
 		return err

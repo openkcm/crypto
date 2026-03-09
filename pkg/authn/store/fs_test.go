@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/openkcm/krypton/pkg/authn"
 	"github.com/openkcm/krypton/pkg/authn/store"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFS_StoreAndGet(t *testing.T) {

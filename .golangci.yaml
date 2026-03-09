@@ -45,6 +45,7 @@ linters:
     - funcorder
     - nonamedreturns
     - noinlineerr
+    - inamedparam
   settings:
     errcheck:
       exclude-functions:
