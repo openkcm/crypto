@@ -11,7 +11,7 @@ import (
 func TestNewWithSize(t *testing.T) {
 	t.Run("should create vault with specified size", func(t *testing.T) {
 		// given when
-		subj, err := securemem.NewVaultData("test-region", 64)
+		subj, err := securemem.NewMemVaultData("test-region", 64)
 		assert.NoError(t, err)
 
 		t.Cleanup(func() {
@@ -41,7 +41,7 @@ func TestNewWithSize(t *testing.T) {
 		for _, tt := range tts {
 			t.Run("for "+tt.name, func(t *testing.T) {
 				// given when
-				subj, err := securemem.NewVaultData("test-"+tt.name, tt.size)
+				subj, err := securemem.NewMemVaultData("test-"+tt.name, tt.size)
 
 				// then
 				assert.ErrorIs(t, err, securemem.ErrInvalidSize)
@@ -57,7 +57,7 @@ func TestNewWithData(t *testing.T) {
 		input := []byte("secret123")
 
 		// when
-		subj, err := securemem.NewVaultDataFrom("test-secret", input)
+		subj, err := securemem.NewMemVaultDataFrom("test-secret", input)
 		assert.NoError(t, err)
 
 		t.Cleanup(func() {
@@ -81,7 +81,7 @@ func TestNewWithData(t *testing.T) {
 		for _, tt := range tts {
 			t.Run("should return error for "+tt.name, func(t *testing.T) {
 				// given when
-				subj, err := securemem.NewVaultDataFrom("test-"+tt.name, tt.data)
+				subj, err := securemem.NewMemVaultDataFrom("test-"+tt.name, tt.data)
 
 				// then
 				assert.ErrorIs(t, err, securemem.ErrInvalidSize)
@@ -95,7 +95,7 @@ func TestNewWithData(t *testing.T) {
 		input := []byte("original")
 
 		// when
-		subj, err := securemem.NewVaultDataFrom("test-copy", input)
+		subj, err := securemem.NewMemVaultDataFrom("test-copy", input)
 		assert.NoError(t, err)
 
 		t.Cleanup(func() {
@@ -114,7 +114,7 @@ func TestNewWithData(t *testing.T) {
 func TestDestroy(t *testing.T) {
 	t.Run("should securely destroy vault data", func(t *testing.T) {
 		// given
-		subj, err := securemem.NewVaultData("test-destroy", 128)
+		subj, err := securemem.NewMemVaultData("test-destroy", 128)
 		assert.NoError(t, err)
 
 		// when
@@ -127,7 +127,7 @@ func TestDestroy(t *testing.T) {
 
 	t.Run("should be idempotent", func(t *testing.T) {
 		// given
-		subj, err := securemem.NewVaultData("test-idempotent", 64)
+		subj, err := securemem.NewMemVaultData("test-idempotent", 64)
 		assert.NoError(t, err)
 
 		// when
@@ -148,7 +148,7 @@ func TestDestroy(t *testing.T) {
 func TestReadonly(t *testing.T) {
 	t.Run("should set vault to readonly mode", func(t *testing.T) {
 		// given
-		subj, err := securemem.NewVaultData("test-readonly", 40)
+		subj, err := securemem.NewMemVaultData("test-readonly", 40)
 		assert.NoError(t, err)
 
 		t.Cleanup(func() {
@@ -165,7 +165,7 @@ func TestReadonly(t *testing.T) {
 
 	t.Run("should be idempotent", func(t *testing.T) {
 		// given
-		subj, err := securemem.NewVaultData("test-readonly-idempotent", 40)
+		subj, err := securemem.NewMemVaultData("test-readonly-idempotent", 40)
 		assert.NoError(t, err)
 
 		t.Cleanup(func() {

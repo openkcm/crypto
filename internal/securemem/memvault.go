@@ -2,25 +2,25 @@ package securemem
 
 import "errors"
 
-type Vault struct {
-	data map[string]*VaultData
+type MemVault struct {
+	data map[string]*MemVaultData
 }
 
-func NewVault() *Vault {
-	return &Vault{
-		data: make(map[string]*VaultData),
+func NewMemVault() *MemVault {
+	return &MemVault{
+		data: make(map[string]*MemVaultData),
 	}
 }
 
 var ErrDestroyAll = errors.New("failed to destroy all vault data")
 
-func (v *Vault) Put(name string, data []byte) error {
+func (v *MemVault) Put(name string, data []byte) error {
 	err := v.Destroy(name)
 	if err != nil {
 		return err
 	}
 
-	vaultData, err := NewVaultDataFrom(name, data)
+	vaultData, err := NewMemVaultDataFrom(name, data)
 	if err != nil {
 		return err
 	}
@@ -29,13 +29,13 @@ func (v *Vault) Put(name string, data []byte) error {
 	return nil
 }
 
-func (v *Vault) Reserve(name string, size int) ([]byte, error) {
+func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
 	err := v.Destroy(name)
 	if err != nil {
 		return nil, err
 	}
 
-	vaultData, err := NewVaultData(name, size)
+	vaultData, err := NewMemVaultData(name, size)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (v *Vault) Reserve(name string, size int) ([]byte, error) {
 	return vaultData.Data(), nil
 }
 
-func (v *Vault) Get(name string) ([]byte, bool) {
+func (v *MemVault) Get(name string) ([]byte, bool) {
 	vaultData, ok := v.data[name]
 	if !ok {
 		return nil, false
@@ -53,7 +53,7 @@ func (v *Vault) Get(name string) ([]byte, bool) {
 	return vaultData.Data(), true
 }
 
-func (v *Vault) DestroyAll() error {
+func (v *MemVault) DestroyAll() error {
 	isError := false
 	for name := range v.data {
 		err := v.Destroy(name)
@@ -67,7 +67,7 @@ func (v *Vault) DestroyAll() error {
 	return nil
 }
 
-func (v *Vault) Destroy(name string) error {
+func (v *MemVault) Destroy(name string) error {
 	vaultData, ok := v.data[name]
 	if !ok {
 		return nil

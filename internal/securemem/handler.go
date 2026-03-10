@@ -8,7 +8,7 @@ import (
 type (
 	SessionHandler func(context.Context, *VaultSession) error
 	VaultSession   struct {
-		vault     *Vault
+		vault     *MemVault
 		toPersist map[string]struct{}
 	}
 	VaultState = VaultSession
@@ -17,7 +17,7 @@ type (
 func newVaultSession() *VaultSession {
 	return &VaultSession{
 		toPersist: make(map[string]struct{}),
-		vault:     NewVault(),
+		vault:     NewMemVault(),
 	}
 }
 

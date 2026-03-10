@@ -11,7 +11,7 @@ import (
 func TestNewVault(t *testing.T) {
 	// given
 	// when
-	vault := securemem.NewVault()
+	vault := securemem.NewMemVault()
 
 	// then
 	assert.NotNil(t, vault)
@@ -20,7 +20,7 @@ func TestNewVault(t *testing.T) {
 func TestGet(t *testing.T) {
 	t.Run("should return data from vault", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
@@ -37,7 +37,7 @@ func TestGet(t *testing.T) {
 
 	t.Run("should return false when data does not exist in vault", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "non-existing"
 
 		// when
@@ -52,7 +52,7 @@ func TestGet(t *testing.T) {
 func TestPut(t *testing.T) {
 	t.Run("should put data into vault", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		keys := []string{"test1", "test2", "test3"}
 		data := []byte("secret")
 
@@ -73,7 +73,7 @@ func TestPut(t *testing.T) {
 
 	t.Run("should not change the original data after putting into vault", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
@@ -106,7 +106,7 @@ func TestPut(t *testing.T) {
 		for _, tt := range tts {
 			t.Run(tt.name, func(t *testing.T) {
 				// given
-				vault := securemem.NewVault()
+				vault := securemem.NewMemVault()
 				name := "foo"
 
 				// when
@@ -120,7 +120,7 @@ func TestPut(t *testing.T) {
 
 	t.Run("should be able to put data with same name", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data1 := []byte("secret1")
 		data2 := []byte("secret2")
@@ -150,7 +150,7 @@ func TestPut(t *testing.T) {
 func TestReserve(t *testing.T) {
 	t.Run("should reserve a buffer in the vault", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
@@ -183,7 +183,7 @@ func TestReserve(t *testing.T) {
 		for _, tt := range tts {
 			t.Run(tt.name, func(t *testing.T) {
 				// given
-				vault := securemem.NewVault()
+				vault := securemem.NewMemVault()
 				name := "foo"
 
 				// when
@@ -198,7 +198,7 @@ func TestReserve(t *testing.T) {
 
 	t.Run("should be able to reserve data with same name", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data1 := []byte("secret1")
 		data2 := []byte("secret23")
@@ -234,7 +234,7 @@ func TestReserve(t *testing.T) {
 func TestPutAndReserve(t *testing.T) {
 	t.Run("should reserve and put data into vault with same name", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
@@ -264,7 +264,7 @@ func TestPutAndReserve(t *testing.T) {
 
 	t.Run("should put and reserve data into vault with same name", func(t *testing.T) {
 		// given
-		vault := securemem.NewVault()
+		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
@@ -296,7 +296,7 @@ func TestVaultDestroy(t *testing.T) {
 	t.Run("destroy", func(t *testing.T) {
 		t.Run("should destroy a specific data in vault", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name1 := "test1"
 			name2 := "test2"
 			name3 := "test3"
@@ -336,7 +336,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should be idempotent when destroying data", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name := "test"
 			data := []byte("secret")
 
@@ -358,7 +358,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should not return an error when destroying non-existing data", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name := "test"
 
 			// when
@@ -370,7 +370,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should be able to reuse the name after destroying data", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name := "test"
 			data1 := []byte("secret1")
 			data2 := []byte("secret2")
@@ -395,7 +395,7 @@ func TestVaultDestroy(t *testing.T) {
 	t.Run("destroy all", func(t *testing.T) {
 		t.Run("should destroy all data in vault", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name1 := "test1"
 			name2 := "test2"
 			name3 := "test3"
@@ -431,7 +431,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should be idempotent when destroying all data", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name := "test"
 			data := []byte("secret")
 
@@ -453,7 +453,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should not return an error when vault is empty", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 
 			// when
 			err := vault.DestroyAll()
@@ -464,7 +464,7 @@ func TestVaultDestroy(t *testing.T) {
 
 		t.Run("should be able to reuse the names after destroying all data", func(t *testing.T) {
 			// given
-			vault := securemem.NewVault()
+			vault := securemem.NewMemVault()
 			name1 := "test1"
 			name2 := "test2"
 			data1 := []byte("secret1")

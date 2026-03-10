@@ -2,7 +2,7 @@ package securemem
 
 import "errors"
 
-type VaultData struct {
+type MemVaultData struct {
 	name       string
 	data       []byte
 	isReadOnly bool
@@ -10,8 +10,8 @@ type VaultData struct {
 
 var ErrInvalidSize = errors.New("invalid size: must be greater than 0")
 
-func NewVaultDataFrom(name string, data []byte) (*VaultData, error) {
-	vault, err := NewVaultData(name, len(data))
+func NewMemVaultDataFrom(name string, data []byte) (*MemVaultData, error) {
+	vault, err := NewMemVaultData(name, len(data))
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +21,7 @@ func NewVaultDataFrom(name string, data []byte) (*VaultData, error) {
 	return vault, nil
 }
 
-func NewVaultData(name string, size int) (*VaultData, error) {
+func NewMemVaultData(name string, size int) (*MemVaultData, error) {
 	if size <= 0 {
 		return nil, ErrInvalidSize
 	}
@@ -31,13 +31,13 @@ func NewVaultData(name string, size int) (*VaultData, error) {
 		return nil, err
 	}
 
-	return &VaultData{
+	return &MemVaultData{
 		name: name,
 		data: aBytes,
 	}, nil
 }
 
-func (m *VaultData) Data() []byte {
+func (m *MemVaultData) Data() []byte {
 	if m.data == nil {
 		return nil
 	}
@@ -45,7 +45,7 @@ func (m *VaultData) Data() []byte {
 	return m.data
 }
 
-func (m *VaultData) Destroy() error {
+func (m *MemVaultData) Destroy() error {
 	if m.data == nil {
 		return nil
 	}
@@ -65,7 +65,7 @@ func (m *VaultData) Destroy() error {
 	return unalloc(m.data)
 }
 
-func (m *VaultData) Readonly() error {
+func (m *MemVaultData) Readonly() error {
 	if m.data == nil {
 		return nil
 	}
@@ -78,6 +78,6 @@ func (m *VaultData) Readonly() error {
 	return err
 }
 
-func (m *VaultData) Name() string {
+func (m *MemVaultData) Name() string {
 	return m.name
 }
