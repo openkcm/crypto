@@ -138,13 +138,13 @@ func TestHandler(t *testing.T) {
 		})
 	})
 
-	t.Run("Reserve", func(t *testing.T) {
+	t.Run("NewTmpBytes", func(t *testing.T) {
 		t.Run("should return a byte slice of the specified size", func(t *testing.T) {
 			// given
 			subj := securemem.NewHandlerRequest()
 
 			// when
-			b, err := subj.Reserve("foo", 10)
+			b, err := subj.NewTmpBytes("foo", 10)
 
 			// then
 			assert.NoError(t, err)
@@ -166,7 +166,7 @@ func TestHandler(t *testing.T) {
 					subj := securemem.NewHandlerRequest()
 
 					// when
-					b, err := subj.Reserve("foo", tt.size)
+					b, err := subj.NewTmpBytes("foo", tt.size)
 
 					// then
 					assert.Error(t, err)
@@ -178,11 +178,11 @@ func TestHandler(t *testing.T) {
 		t.Run("should store the entry in the vault so it can be retrieved with Get", func(t *testing.T) {
 			// given
 			subj := securemem.NewHandlerRequest()
-			b, err := subj.Reserve("foo", 3)
+			b, err := subj.NewTmpBytes("foo", 3)
 			assert.NoError(t, err)
 			assert.Len(t, b, 3)
 
-			// copy the data to the reserved byte slice
+			// copy the data to the tmp byte slice
 			copy(b, []byte("bar"))
 
 			// when
@@ -191,6 +191,129 @@ func TestHandler(t *testing.T) {
 			// then
 			assert.True(t, ok)
 			assert.Equal(t, []byte("bar"), actResult)
+		})
+
+		t.Run("should return error if the entry already exists in the vault", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+			b, err := subj.NewTmpBytes("foo", 1)
+			assert.NoError(t, err)
+			assert.NotNil(t, b)
+
+			// when
+			b, err = subj.NewTmpBytes("foo", 10)
+
+			// then
+			assert.ErrorIs(t, err, securemem.ErrVaultDataAlreadyExists)
+			assert.Nil(t, b)
+		})
+
+		t.Run("should not return error if already existing entry is destroyed before creating a tmp bytes", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+			b, err := subj.NewTmpBytes("foo", 1)
+			assert.NoError(t, err)
+			assert.NotNil(t, b)
+
+			// when
+			err = subj.Destroy("foo")
+			assert.NoError(t, err)
+
+			b, err = subj.NewTmpBytes("foo", 10)
+
+			// then
+			assert.NoError(t, err)
+			assert.Len(t, b, 10)
+		})
+	})
+
+	t.Run("NewPersistedBytes", func(t *testing.T) {
+		t.Run("should return a byte slice of the specified size", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+
+			// when
+			b, err := subj.NewPersistedBytes("foo", 10)
+
+			// then
+			assert.NoError(t, err)
+			assert.Len(t, b, 10)
+			assert.Equal(t, make([]byte, len(b)), b)
+		})
+
+		t.Run("should return an error if the size is", func(t *testing.T) {
+			tts := []struct {
+				name string
+				size int
+			}{
+				{name: "zero", size: 0},
+				{name: "negative", size: -1},
+			}
+
+			for _, tt := range tts {
+				t.Run(tt.name, func(t *testing.T) {
+					// given
+					subj := securemem.NewHandlerRequest()
+
+					// when
+					b, err := subj.NewPersistedBytes("foo", tt.size)
+
+					// then
+					assert.Error(t, err)
+					assert.Nil(t, b)
+				})
+			}
+		})
+
+		t.Run("should store the entry in the vault so it can be retrieved with Get", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+			b, err := subj.NewPersistedBytes("foo", 3)
+			assert.NoError(t, err)
+			assert.Len(t, b, 3)
+
+			// copy the data to the persisted byte slice
+			copy(b, []byte("bar"))
+
+			// when
+			actResult, ok := subj.Get("foo")
+
+			// then
+			assert.True(t, ok)
+			assert.Equal(t, []byte("bar"), actResult)
+		})
+
+		t.Run("should return error if the entry already exists in the vault", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+			b, err := subj.NewPersistedBytes("foo", 1)
+			assert.NoError(t, err)
+			assert.NotNil(t, b)
+
+			// when
+			b, err = subj.NewPersistedBytes("foo", 10)
+
+			// then
+			assert.ErrorIs(t, err, securemem.ErrVaultDataAlreadyExists)
+			assert.Nil(t, b)
+		})
+
+		t.Run("should not return error if already existing entry is destroyed before creating a persisted bytes", func(t *testing.T) {
+			// given
+			subj := securemem.NewHandlerRequest()
+			b, err := subj.NewPersistedBytes("foo", 1)
+			assert.NoError(t, err)
+			assert.NotNil(t, b)
+
+			// when
+			err = subj.Destroy("foo")
+			assert.NoError(t, err)
+
+			b, err = subj.NewPersistedBytes("foo", 10)
+
+			// then
+			assert.NoError(t, err)
+			assert.Len(t, b, 10)
 		})
 	})
 
@@ -260,7 +383,7 @@ func TestHandler(t *testing.T) {
 		err = subj.Put(key2, []byte("hello world"))
 		assert.NoError(t, err)
 
-		_, err = subj.Reserve(key3, 10)
+		_, err = subj.NewTmpBytes(key3, 10)
 		assert.NoError(t, err)
 
 		// when
@@ -325,7 +448,7 @@ func TestRun(t *testing.T) {
 			err = req.Persist(key2, data2)
 			assert.NoError(t, err)
 
-			_, err = req.Reserve(key3, 10)
+			_, err = req.NewTmpBytes(key3, 10)
 			assert.NoError(t, err)
 			return nil
 		})
@@ -371,14 +494,14 @@ func TestRun(t *testing.T) {
 			assert.Nil(t, actResult)
 		}
 	})
-	t.Run("should not return data reserved in the handler request", func(t *testing.T) {
+	t.Run("should not return data stored in NewTmpBytes in the handler request", func(t *testing.T) {
 		// given
 		keys := []string{"foo", "bar", "baz"}
 
 		// when
 		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			for _, key := range keys {
-				_, err := req.Reserve(key, 10)
+				_, err := req.NewTmpBytes(key, 10)
 				assert.NoError(t, err)
 			}
 			return nil
@@ -602,7 +725,7 @@ func BenchmarkNewVaultData(b *testing.B) {
 				return err
 			}
 
-			resBytes, err := req.Reserve("bar", 1024)
+			resBytes, err := req.NewTmpBytes("bar", 1024)
 			if err != nil {
 				return err
 			}

@@ -45,7 +45,15 @@ func (r *HandlerRequest) Persist(name string, data []byte) error {
 	return nil
 }
 
-func (r *HandlerRequest) Reserve(name string, size int) ([]byte, error) {
+func (r *HandlerRequest) NewPersistedBytes(name string, size int) ([]byte, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	r.toPersist[name] = struct{}{}
+	return r.vault.Reserve(name, size)
+}
+
+func (r *HandlerRequest) NewTmpBytes(name string, size int) ([]byte, error) {
 	return r.vault.Reserve(name, size)
 }
 

@@ -196,38 +196,25 @@ func TestReserve(t *testing.T) {
 		}
 	})
 
-	t.Run("should be able to reserve data with same name", func(t *testing.T) {
+	t.Run("should return an error if we reserve data with same name", func(t *testing.T) {
 		// given
 		vault := securemem.NewMemVault()
 		name := "test"
-		data1 := []byte("secret1")
-		data2 := []byte("secret23")
+		data := []byte("secret1")
 
 		// when
-		actBytes, err := vault.Reserve(name, len(data1))
+		actBytes, err := vault.Reserve(name, len(data))
 
 		// then
 		assert.NoError(t, err)
-		assert.Len(t, actBytes, len(data1))
-
-		copy(actBytes, data1)
-
-		actResult, ok := vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, data1, actResult)
+		assert.Len(t, actBytes, len(data))
 
 		// when
-		actBytes, err = vault.Reserve(name, len(data2))
+		actBytes, err = vault.Reserve(name, len(data))
 
 		// then
-		assert.NoError(t, err)
-		assert.Len(t, actBytes, len(data2))
-
-		actResult, ok = vault.Get(name)
-		assert.True(t, ok)
-		for i := range actResult {
-			assert.Equal(t, byte(0), actResult[i])
-		}
+		assert.Error(t, err)
+		assert.Nil(t, actBytes)
 	})
 }
 

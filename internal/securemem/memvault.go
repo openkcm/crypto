@@ -16,7 +16,10 @@ func NewMemVault() *MemVault {
 	}
 }
 
-var ErrDestroyAll = errors.New("failed to destroy all vault data")
+var (
+	ErrDestroyAll             = errors.New("failed to destroy all vault data")
+	ErrVaultDataAlreadyExists = errors.New("vault data with the same name already exists")
+)
 
 func (v *MemVault) Put(name string, data []byte) error {
 	err := v.Destroy(name)
@@ -37,18 +40,18 @@ func (v *MemVault) Put(name string, data []byte) error {
 }
 
 func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
-	err := v.Destroy(name)
-	if err != nil {
-		return nil, err
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
+	_, ok := v.data[name]
+	if ok {
+		return nil, ErrVaultDataAlreadyExists
 	}
 
 	vaultData, err := NewMemVaultData(name, size)
 	if err != nil {
 		return nil, err
 	}
-
-	v.mux.Lock()
-	defer v.mux.Unlock()
 
 	v.data[name] = vaultData
 	return vaultData.Data(), nil
