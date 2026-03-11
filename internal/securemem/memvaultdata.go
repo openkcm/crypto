@@ -1,11 +1,15 @@
 package securemem
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 type MemVaultData struct {
 	name       string
 	data       []byte
 	isReadOnly bool
+	mux        sync.RWMutex
 }
 
 var ErrInvalidSize = errors.New("invalid size: must be greater than 0")
@@ -38,6 +42,9 @@ func NewMemVaultData(name string, size int) (*MemVaultData, error) {
 }
 
 func (m *MemVaultData) Data() []byte {
+	m.mux.RLock()
+	defer m.mux.RUnlock()
+
 	if m.data == nil {
 		return nil
 	}
@@ -46,6 +53,9 @@ func (m *MemVaultData) Data() []byte {
 }
 
 func (m *MemVaultData) Destroy() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
 	if m.data == nil {
 		return nil
 	}
@@ -65,7 +75,10 @@ func (m *MemVaultData) Destroy() error {
 	return unalloc(m.data)
 }
 
-func (m *MemVaultData) Readonly() error {
+func (m *MemVaultData) MarkReadOnly() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
 	if m.data == nil {
 		return nil
 	}

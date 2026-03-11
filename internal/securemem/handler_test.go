@@ -9,12 +9,12 @@ import (
 	"github.com/openkcm/krypton/internal/securemem"
 )
 
-func TestVaultSession(t *testing.T) {
+func TestHandler(t *testing.T) {
 	t.Run("Persist", func(t *testing.T) {
 		t.Run("should store the value", func(t *testing.T) {
 			// given
 			exp := []byte("hello world")
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 
 			// when
 			err := subj.Persist("foo", exp)
@@ -39,7 +39,7 @@ func TestVaultSession(t *testing.T) {
 			for _, tt := range tts {
 				t.Run(tt.name, func(t *testing.T) {
 					// given
-					subj := securemem.NewVaultSession()
+					subj := securemem.NewHandlerRequest()
 
 					// when
 					err := subj.Persist("foo", tt.data)
@@ -52,7 +52,7 @@ func TestVaultSession(t *testing.T) {
 
 		t.Run("should overwrite existing value", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 			err := subj.Persist("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
@@ -72,7 +72,7 @@ func TestVaultSession(t *testing.T) {
 		t.Run("should store the value", func(t *testing.T) {
 			// given
 			exp := []byte("hello world")
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 
 			// when
 			err := subj.Put("foo", exp)
@@ -97,7 +97,7 @@ func TestVaultSession(t *testing.T) {
 			for _, tt := range tts {
 				t.Run(tt.name, func(t *testing.T) {
 					// given
-					subj := securemem.NewVaultSession()
+					subj := securemem.NewHandlerRequest()
 
 					// when
 					err := subj.Put("foo", tt.data)
@@ -112,7 +112,7 @@ func TestVaultSession(t *testing.T) {
 	t.Run("Get", func(t *testing.T) {
 		t.Run("should return false if the value does not exist", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 
 			// when
 			b, ok := subj.Get("foo")
@@ -125,7 +125,7 @@ func TestVaultSession(t *testing.T) {
 		t.Run("should return the value if it exists", func(t *testing.T) {
 			// given
 			exp := []byte("hello world")
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 			err := subj.Put("foo", exp)
 			assert.NoError(t, err)
 
@@ -141,7 +141,7 @@ func TestVaultSession(t *testing.T) {
 	t.Run("Reserve", func(t *testing.T) {
 		t.Run("should return a byte slice of the specified size", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 
 			// when
 			b, err := subj.Reserve("foo", 10)
@@ -163,7 +163,7 @@ func TestVaultSession(t *testing.T) {
 			for _, tt := range tts {
 				t.Run(tt.name, func(t *testing.T) {
 					// given
-					subj := securemem.NewVaultSession()
+					subj := securemem.NewHandlerRequest()
 
 					// when
 					b, err := subj.Reserve("foo", tt.size)
@@ -177,7 +177,7 @@ func TestVaultSession(t *testing.T) {
 
 		t.Run("should store the entry in the vault so it can be retrieved with Get", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 			b, err := subj.Reserve("foo", 3)
 			assert.NoError(t, err)
 			assert.Len(t, b, 3)
@@ -197,7 +197,7 @@ func TestVaultSession(t *testing.T) {
 	t.Run("Destroy", func(t *testing.T) {
 		t.Run("should remove the entry from the vault", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 			err := subj.Persist("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
@@ -214,7 +214,7 @@ func TestVaultSession(t *testing.T) {
 
 		t.Run("should not return an error if the entry does not exist", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 
 			// when
 			err := subj.Destroy("foo")
@@ -225,7 +225,7 @@ func TestVaultSession(t *testing.T) {
 
 		t.Run("should not affect other entries in the vault", func(t *testing.T) {
 			// given
-			subj := securemem.NewVaultSession()
+			subj := securemem.NewHandlerRequest()
 			err := subj.Persist("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
@@ -250,7 +250,7 @@ func TestVaultSession(t *testing.T) {
 
 	t.Run("DestroyAll should clear all entries in the vault", func(t *testing.T) {
 		// given
-		subj := securemem.NewVaultSession()
+		subj := securemem.NewHandlerRequest()
 		key1 := "foo"
 		key2 := "baz"
 		key3 := "qux"
@@ -284,15 +284,15 @@ func TestVaultSession(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	t.Run("should return the persisted data in the vault state", func(t *testing.T) {
+	t.Run("should return the persisted data in the handler response", func(t *testing.T) {
 		// given
 		exp := []byte("hello world")
 		keys := []string{"foo", "bar", "baz"}
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			for _, key := range keys {
-				err := sess.Persist(key, exp)
+				err := req.Persist(key, exp)
 				assert.NoError(t, err)
 			}
 			return nil
@@ -300,16 +300,16 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
 		for _, key := range keys {
-			actResult, ok := state.Get(key)
+			actResult, ok := resp.Get(key)
 			assert.True(t, ok)
 			assert.Equal(t, exp, actResult)
 		}
 	})
 
-	t.Run("should only return the persisted data in the vault state", func(t *testing.T) {
+	t.Run("should only return the persisted data in the handler response", func(t *testing.T) {
 		// given
 		key1 := "foo"
 		key2 := "bar"
@@ -318,44 +318,44 @@ func TestRun(t *testing.T) {
 		data2 := []byte("data2")
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
-			err := sess.Put(key1, data1)
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
+			err := req.Put(key1, data1)
 			assert.NoError(t, err)
 
-			err = sess.Persist(key2, data2)
+			err = req.Persist(key2, data2)
 			assert.NoError(t, err)
 
-			_, err = sess.Reserve(key3, 10)
+			_, err = req.Reserve(key3, 10)
 			assert.NoError(t, err)
 			return nil
 		})
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
-		actResult, ok := state.Get(key2)
+		actResult, ok := resp.Get(key2)
 		assert.True(t, ok)
 		assert.Equal(t, data2, actResult)
 
-		actResult, ok = state.Get(key1)
+		actResult, ok = resp.Get(key1)
 		assert.False(t, ok)
 		assert.Nil(t, actResult)
 
-		actResult, ok = state.Get(key3)
+		actResult, ok = resp.Get(key3)
 		assert.False(t, ok)
 		assert.Nil(t, actResult)
 	})
 
-	t.Run("should not return data Put in the vault session", func(t *testing.T) {
+	t.Run("should not return data Put in the handler request", func(t *testing.T) {
 		// given
 		exp := []byte("hello world")
 		keys := []string{"foo", "bar", "baz"}
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			for _, key := range keys {
-				err := sess.Put(key, exp)
+				err := req.Put(key, exp)
 				assert.NoError(t, err)
 			}
 			return nil
@@ -363,22 +363,22 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
 		for _, key := range keys {
-			actResult, ok := state.Get(key)
+			actResult, ok := resp.Get(key)
 			assert.False(t, ok)
 			assert.Nil(t, actResult)
 		}
 	})
-	t.Run("should not return data reserved in the vault session", func(t *testing.T) {
+	t.Run("should not return data reserved in the handler request", func(t *testing.T) {
 		// given
 		keys := []string{"foo", "bar", "baz"}
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			for _, key := range keys {
-				_, err := sess.Reserve(key, 10)
+				_, err := req.Reserve(key, 10)
 				assert.NoError(t, err)
 			}
 			return nil
@@ -386,37 +386,37 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
 		for _, key := range keys {
-			actResult, ok := state.Get(key)
+			actResult, ok := resp.Get(key)
 			assert.False(t, ok)
 			assert.Nil(t, actResult)
 		}
 	})
 
-	t.Run("should Destroy all vault entries in the internal vault session", func(t *testing.T) {
+	t.Run("should Destroy all vault entries in the internal handler request", func(t *testing.T) {
 		// given
-		var actualSess *securemem.VaultSession
+		var actualReq *securemem.HandlerRequest
 		exp := []byte("hello world")
 		keys := []string{"foo", "bar", "baz"}
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			for _, key := range keys {
-				err := sess.Persist(key, exp)
+				err := req.Persist(key, exp)
 				assert.NoError(t, err)
 			}
-			actualSess = sess
+			actualReq = req
 			return nil
 		})
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
 		for _, key := range keys {
-			actResult, ok := actualSess.Get(key)
+			actResult, ok := actualReq.Get(key)
 			assert.False(t, ok)
 			assert.Nil(t, actResult)
 		}
@@ -426,24 +426,24 @@ func TestRun(t *testing.T) {
 		// given
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			return assert.AnError
 		})
 
 		// then
 		assert.ErrorIs(t, err, assert.AnError)
-		assert.Nil(t, state)
+		assert.Nil(t, resp)
 	})
 
-	t.Run("should not persist the keys in the session state if the handler returns an error", func(t *testing.T) {
+	t.Run("should not persist the keys in the handler response if the handler returns an error", func(t *testing.T) {
 		// given
-		var actSess *securemem.VaultSession
+		var actReq *securemem.HandlerRequest
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
-			actSess = sess
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
+			actReq = req
 
-			err := sess.Persist("foo", []byte("hello world"))
+			err := req.Persist("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
 			return assert.AnError
@@ -451,9 +451,9 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.ErrorIs(t, err, assert.AnError)
-		assert.Nil(t, state)
+		assert.Nil(t, resp)
 
-		actResult, ok := actSess.Get("foo")
+		actResult, ok := actReq.Get("foo")
 		assert.False(t, ok)
 		assert.Nil(t, actResult)
 	})
@@ -462,14 +462,14 @@ func TestRun(t *testing.T) {
 		// given
 
 		// when
-		state, err := securemem.Run(context.Background(), func(ctx context.Context, sess *securemem.VaultSession) error {
-			err := sess.Persist("foo", []byte("hello world"))
+		resp, err := securemem.Run(context.Background(), func(ctx context.Context, req *securemem.HandlerRequest) error {
+			err := req.Persist("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
-			err = sess.Destroy("foo")
+			err = req.Destroy("foo")
 			assert.NoError(t, err)
 
-			err = sess.Put("foo", []byte("hello world"))
+			err = req.Put("foo", []byte("hello world"))
 			assert.NoError(t, err)
 
 			return nil
@@ -477,83 +477,83 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.NotNil(t, state)
+		assert.NotNil(t, resp)
 
-		actResult, ok := state.Get("foo")
+		actResult, ok := resp.Get("foo")
 		assert.False(t, ok)
 		assert.Nil(t, actResult)
 	})
 }
 
 func TestTransferPersistedValues(t *testing.T) {
-	t.Run("should transfer persisted values from the session to the state", func(t *testing.T) {
+	t.Run("should transfer persisted values from the handler request to the handler response", func(t *testing.T) {
 		// given
-		sess := securemem.NewVaultSession()
-		state := securemem.NewVaultSession()
+		req := securemem.NewHandlerRequest()
+		resp := securemem.NewHandlerRequest()
 
 		keys := []string{"foo", "bar", "baz"}
 
 		for _, key := range keys {
-			err := sess.Persist(key, []byte("hello world"))
+			err := req.Persist(key, []byte("hello world"))
 			assert.NoError(t, err)
 		}
 
 		// when
-		err := securemem.TransferPersistedValues(sess, state)
+		err := securemem.TransferPersistedValues(req, resp)
 
 		// then
 		assert.NoError(t, err)
 
 		for _, key := range keys {
-			actResult, ok := state.Get(key)
+			actResult, ok := resp.Get(key)
 			assert.True(t, ok)
 			assert.Equal(t, []byte("hello world"), actResult)
 		}
 	})
 
-	t.Run("should not transfer Put values from the session to the state", func(t *testing.T) {
+	t.Run("should not transfer Put values from the handler request to the handler response", func(t *testing.T) {
 		// given
-		sess := securemem.NewVaultSession()
-		state := securemem.NewVaultSession()
+		req := securemem.NewHandlerRequest()
+		resp := securemem.NewHandlerRequest()
 
 		keys := []string{"foo", "bar", "baz"}
 
 		for _, key := range keys {
-			err := sess.Put(key, []byte("hello world"))
+			err := req.Put(key, []byte("hello world"))
 			assert.NoError(t, err)
 		}
 
 		// when
-		err := securemem.TransferPersistedValues(sess, state)
+		err := securemem.TransferPersistedValues(req, resp)
 
 		// then
 		assert.NoError(t, err)
 
 		for _, key := range keys {
-			actResult, ok := state.Get(key)
+			actResult, ok := resp.Get(key)
 			assert.False(t, ok)
 			assert.Nil(t, actResult)
 		}
 	})
 
-	t.Run("should not persist keys that are destroyed in the session", func(t *testing.T) {
+	t.Run("should not persist keys that are destroyed in the handler request", func(t *testing.T) {
 		// given
-		sess := securemem.NewVaultSession()
-		state := securemem.NewVaultSession()
+		req := securemem.NewHandlerRequest()
+		resp := securemem.NewHandlerRequest()
 
-		err := sess.Persist("foo", []byte("hello world"))
+		err := req.Persist("foo", []byte("hello world"))
 		assert.NoError(t, err)
 
-		err = sess.Destroy("foo")
+		err = req.Destroy("foo")
 		assert.NoError(t, err)
 
 		// when
-		err = securemem.TransferPersistedValues(sess, state)
+		err = securemem.TransferPersistedValues(req, resp)
 
 		// then
 		assert.NoError(t, err)
 
-		actResult, ok := state.Get("foo")
+		actResult, ok := resp.Get("foo")
 		assert.False(t, ok)
 		assert.Nil(t, actResult)
 	})
@@ -566,13 +566,13 @@ func TestContextCancel(t *testing.T) {
 		cancel()
 
 		// when
-		state, err := securemem.Run(ctx, func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(ctx, func(ctx context.Context, req *securemem.HandlerRequest) error {
 			return nil
 		})
 
 		// then
 		assert.ErrorIs(t, err, context.Canceled)
-		assert.Nil(t, state)
+		assert.Nil(t, resp)
 	})
 
 	t.Run("should return an error if the context is canceled during the handler execution", func(t *testing.T) {
@@ -580,29 +580,29 @@ func TestContextCancel(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 
 		// when
-		state, err := securemem.Run(ctx, func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(ctx, func(ctx context.Context, req *securemem.HandlerRequest) error {
 			cancel()
 			return nil
 		})
 
 		// then
 		assert.ErrorIs(t, err, context.Canceled)
-		assert.Nil(t, state)
+		assert.Nil(t, resp)
 	})
 }
 
-// TODO: This benchmark is not very meaningful, as it only tests the overhead of creating a new vault session and running
+// TODO: This benchmark is not very meaningful, as it only tests the overhead of creating a new handler request and running
 // a simple operation. A more realistic benchmark would involve multiple operations and possibly concurrent access to the vault.
 func BenchmarkNewVaultData(b *testing.B) {
 	for b.Loop() {
-		state, err := securemem.Run(b.Context(), func(ctx context.Context, sess *securemem.VaultSession) error {
+		resp, err := securemem.Run(b.Context(), func(ctx context.Context, req *securemem.HandlerRequest) error {
 			secret := []byte("hello world")
-			err := sess.Persist("foo", secret)
+			err := req.Persist("foo", secret)
 			if err != nil {
 				return err
 			}
 
-			resBytes, err := sess.Reserve("bar", 1024)
+			resBytes, err := req.Reserve("bar", 1024)
 			if err != nil {
 				return err
 			}
@@ -610,9 +610,9 @@ func BenchmarkNewVaultData(b *testing.B) {
 			return nil
 		})
 		assert.NoError(b, err)
-		assert.NotNil(b, state)
+		assert.NotNil(b, resp)
 
-		err = state.DestroyAll()
+		err = resp.DestroyAll()
 		assert.NoError(b, err)
 	}
 }

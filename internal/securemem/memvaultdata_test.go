@@ -157,7 +157,7 @@ func TestReadonly(t *testing.T) {
 		})
 
 		// when
-		err = subj.Readonly()
+		err = subj.MarkReadOnly()
 
 		// then
 		assert.NoError(t, err)
@@ -174,13 +174,13 @@ func TestReadonly(t *testing.T) {
 		})
 
 		// when
-		err = subj.Readonly()
+		err = subj.MarkReadOnly()
 
 		// then
 		assert.NoError(t, err)
 
 		// when
-		err = subj.Readonly()
+		err = subj.MarkReadOnly()
 
 		// then
 		assert.NoError(t, err)

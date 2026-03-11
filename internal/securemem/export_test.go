@@ -1,6 +1,6 @@
 package securemem
 
 var (
-	NewVaultSession         = newVaultSession
+	NewHandlerRequest       = newHandlerRequest
 	TransferPersistedValues = transferPersistedValues
 )

@@ -1,8 +1,12 @@
 package securemem
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 type MemVault struct {
+	mux  sync.RWMutex
 	data map[string]*MemVaultData
 }
 
@@ -25,6 +29,9 @@ func (v *MemVault) Put(name string, data []byte) error {
 		return err
 	}
 
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
 	v.data[name] = vaultData
 	return nil
 }
@@ -40,11 +47,17 @@ func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
 		return nil, err
 	}
 
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
 	v.data[name] = vaultData
 	return vaultData.Data(), nil
 }
 
 func (v *MemVault) Get(name string) ([]byte, bool) {
+	v.mux.RLock()
+	defer v.mux.RUnlock()
+
 	vaultData, ok := v.data[name]
 	if !ok {
 		return nil, false
@@ -54,20 +67,30 @@ func (v *MemVault) Get(name string) ([]byte, bool) {
 }
 
 func (v *MemVault) DestroyAll() error {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
 	isError := false
-	for name := range v.data {
-		err := v.Destroy(name)
+	for name, vaultData := range v.data {
+		err := vaultData.Destroy()
 		if err != nil {
 			isError = true
+			continue
 		}
+		delete(v.data, name)
 	}
+
 	if isError {
 		return ErrDestroyAll
 	}
+
 	return nil
 }
 
 func (v *MemVault) Destroy(name string) error {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
 	vaultData, ok := v.data[name]
 	if !ok {
 		return nil
@@ -76,6 +99,7 @@ func (v *MemVault) Destroy(name string) error {
 	if err != nil {
 		return err
 	}
+
 	delete(v.data, name)
 	return nil
 }
