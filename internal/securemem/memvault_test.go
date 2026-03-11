@@ -24,8 +24,9 @@ func TestGet(t *testing.T) {
 		name := "test"
 		data := []byte("secret")
 
-		err := vault.Put(name, data)
+		b, err := vault.Reserve(name, len(data))
 		assert.NoError(t, err)
+		copy(b, data)
 
 		// when
 		actResult, ok := vault.Get(name)
@@ -49,126 +50,27 @@ func TestGet(t *testing.T) {
 	})
 }
 
-func TestPut(t *testing.T) {
-	t.Run("should put data into vault", func(t *testing.T) {
+func TestReserve(t *testing.T) {
+	t.Run("should reserve a buffer in the vault", func(t *testing.T) {
 		// given
 		vault := securemem.NewMemVault()
 		keys := []string{"test1", "test2", "test3"}
-		data := []byte("secret")
 
 		// when
 		for _, name := range keys {
-			err := vault.Put(name, data)
+			b, err := vault.Reserve(name, len(name))
+
 			// then
 			assert.NoError(t, err)
+			copy(b, name)
 		}
 
 		for _, name := range keys {
 			// then
 			actResult, ok := vault.Get(name)
 			assert.True(t, ok)
-			assert.Equal(t, data, actResult)
+			assert.Equal(t, name, string(actResult))
 		}
-	})
-
-	t.Run("should not change the original data after putting into vault", func(t *testing.T) {
-		// given
-		vault := securemem.NewMemVault()
-		name := "test"
-		data := []byte("secret")
-
-		// when
-		err := vault.Put(name, data)
-
-		// then
-		assert.NoError(t, err)
-
-		actResult, ok := vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, data, actResult)
-
-		data[0] = 'S'
-
-		actResult, ok = vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, []byte("secret"), actResult)
-	})
-
-	t.Run("should return error when data is", func(t *testing.T) {
-		tts := []struct {
-			name string
-			data []byte
-		}{
-			{name: "empty", data: []byte("")},
-			{name: "nil", data: nil},
-		}
-
-		for _, tt := range tts {
-			t.Run(tt.name, func(t *testing.T) {
-				// given
-				vault := securemem.NewMemVault()
-				name := "foo"
-
-				// when
-				err := vault.Put(name, tt.data)
-
-				// then
-				assert.ErrorIs(t, err, securemem.ErrInvalidSize)
-			})
-		}
-	})
-
-	t.Run("should be able to put data with same name", func(t *testing.T) {
-		// given
-		vault := securemem.NewMemVault()
-		name := "test"
-		data1 := []byte("secret1")
-		data2 := []byte("secret2")
-
-		// when
-		err := vault.Put(name, data1)
-
-		// then
-		assert.NoError(t, err)
-
-		actResult, ok := vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, data1, actResult)
-
-		// when
-		err = vault.Put(name, data2)
-
-		// then
-		assert.NoError(t, err)
-
-		actResult, ok = vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, data2, actResult)
-	})
-}
-
-func TestReserve(t *testing.T) {
-	t.Run("should reserve a buffer in the vault", func(t *testing.T) {
-		// given
-		vault := securemem.NewMemVault()
-		name := "test"
-		data := []byte("secret")
-
-		// when
-		actBytes, err := vault.Reserve(name, len(data))
-
-		// then
-		assert.NoError(t, err)
-		assert.Len(t, actBytes, len(data))
-		for i := range actBytes {
-			assert.Equal(t, byte(0), actBytes[i])
-		}
-
-		copy(actBytes, data)
-
-		actBytes, ok := vault.Get(name)
-		assert.True(t, ok)
-		assert.Equal(t, data, actBytes)
 	})
 
 	t.Run("should return error when reserve size is invalid", func(t *testing.T) {
@@ -216,30 +118,16 @@ func TestReserve(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, actBytes)
 	})
-}
 
-func TestPutAndReserve(t *testing.T) {
-	t.Run("should reserve and put data into vault with same name", func(t *testing.T) {
+	t.Run("should not change the original data after copying data into vault", func(t *testing.T) {
 		// given
 		vault := securemem.NewMemVault()
 		name := "test"
 		data := []byte("secret")
 
 		// when
-		actBytes, err := vault.Reserve(name, 12)
-
-		// then
-		assert.NoError(t, err)
-		assert.Len(t, actBytes, 12)
-
-		actBytes, ok := vault.Get(name)
-		assert.True(t, ok)
-		for i := range actBytes {
-			assert.Equal(t, byte(0), actBytes[i])
-		}
-
-		// when
-		err = vault.Put(name, data)
+		b, err := vault.Reserve(name, len(data))
+		copy(b, data)
 
 		// then
 		assert.NoError(t, err)
@@ -247,35 +135,12 @@ func TestPutAndReserve(t *testing.T) {
 		actResult, ok := vault.Get(name)
 		assert.True(t, ok)
 		assert.Equal(t, data, actResult)
-	})
 
-	t.Run("should put and reserve data into vault with same name", func(t *testing.T) {
-		// given
-		vault := securemem.NewMemVault()
-		name := "test"
-		data := []byte("secret")
+		data[0] = 'S'
 
-		// when
-		err := vault.Put(name, data)
-		// then
-		assert.NoError(t, err)
-
-		actResult, ok := vault.Get(name)
+		actResult, ok = vault.Get(name)
 		assert.True(t, ok)
-		assert.Equal(t, data, actResult)
-
-		// when
-		actBytes, err := vault.Reserve(name, 12)
-
-		// then
-		assert.NoError(t, err)
-		assert.Len(t, actBytes, 12)
-
-		actBytes, ok = vault.Get(name)
-		assert.True(t, ok)
-		for i := range actBytes {
-			assert.Equal(t, byte(0), actBytes[i])
-		}
+		assert.Equal(t, []byte("secret"), actResult)
 	})
 }
 
@@ -291,11 +156,13 @@ func TestVaultDestroy(t *testing.T) {
 			data2 := []byte("secret2")
 			data3 := []byte("secret3")
 
-			err := vault.Put(name1, data1)
+			b1, err := vault.Reserve(name1, len(data1))
 			assert.NoError(t, err)
+			copy(b1, data1)
 
-			err = vault.Put(name2, data2)
+			b2, err := vault.Reserve(name2, len(data2))
 			assert.NoError(t, err)
+			copy(b2, data2)
 
 			_, err = vault.Reserve(name3, len(data3))
 			assert.NoError(t, err)
@@ -325,10 +192,11 @@ func TestVaultDestroy(t *testing.T) {
 			// given
 			vault := securemem.NewMemVault()
 			name := "test"
-			data := []byte("secret")
+			size := 10
 
-			err := vault.Put(name, data)
+			b, err := vault.Reserve(name, size)
 			assert.NoError(t, err)
+			assert.Len(t, b, size)
 
 			// when
 			err = vault.Destroy(name)
@@ -362,15 +230,18 @@ func TestVaultDestroy(t *testing.T) {
 			data1 := []byte("secret1")
 			data2 := []byte("secret2")
 
-			err := vault.Put(name, data1)
+			b, err := vault.Reserve(name, len(data1))
 			assert.NoError(t, err)
+			assert.Len(t, b, len(data1))
+			copy(b, data1)
 
 			// when
 			err = vault.Destroy(name)
 			assert.NoError(t, err)
 
-			err = vault.Put(name, data2)
+			b, err = vault.Reserve(name, len(data2))
 			assert.NoError(t, err)
+			copy(b, data2)
 
 			// then
 			actBytes, ok := vault.Get(name)
@@ -386,16 +257,14 @@ func TestVaultDestroy(t *testing.T) {
 			name1 := "test1"
 			name2 := "test2"
 			name3 := "test3"
-			data1 := []byte("secret1")
-			data2 := []byte("secret2")
 
-			err := vault.Put(name1, data1)
+			_, err := vault.Reserve(name1, 1)
 			assert.NoError(t, err)
 
-			err = vault.Put(name2, data2)
+			_, err = vault.Reserve(name2, 2)
 			assert.NoError(t, err)
 
-			_, err = vault.Reserve(name3, len(data1))
+			_, err = vault.Reserve(name3, 3)
 			assert.NoError(t, err)
 
 			// when
@@ -420,9 +289,8 @@ func TestVaultDestroy(t *testing.T) {
 			// given
 			vault := securemem.NewMemVault()
 			name := "test"
-			data := []byte("secret")
 
-			err := vault.Put(name, data)
+			_, err := vault.Reserve(name, 10)
 			assert.NoError(t, err)
 
 			// when
@@ -457,21 +325,25 @@ func TestVaultDestroy(t *testing.T) {
 			data1 := []byte("secret1")
 			data2 := []byte("secret2")
 
-			err := vault.Put(name1, data1)
+			b, err := vault.Reserve(name1, len(data1))
 			assert.NoError(t, err)
+			copy(b, data1)
 
-			err = vault.Put(name2, data2)
+			b, err = vault.Reserve(name2, len(data2))
 			assert.NoError(t, err)
+			copy(b, data2)
 
 			// when
 			err = vault.DestroyAll()
 			assert.NoError(t, err)
 
-			err = vault.Put(name1, data1)
+			b, err = vault.Reserve(name1, len(data1))
 			assert.NoError(t, err)
+			copy(b, data1)
 
-			err = vault.Put(name2, data2)
+			b, err = vault.Reserve(name2, len(data2))
 			assert.NoError(t, err)
+			copy(b, data2)
 
 			// then
 			actBytes, ok := vault.Get(name1)

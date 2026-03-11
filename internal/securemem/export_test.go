@@ -1,6 +1,3 @@
 package securemem
 
-var (
-	NewHandlerRequest       = newHandlerRequest
-	TransferPersistedValues = transferPersistedValues
-)
+var NewHandlerRequest = newHandlerRequest

@@ -2,6 +2,7 @@ package securemem
 
 import (
 	"errors"
+	"log"
 	"sync"
 )
 
@@ -20,24 +21,6 @@ var (
 	ErrDestroyAll             = errors.New("failed to destroy all vault data")
 	ErrVaultDataAlreadyExists = errors.New("vault data with the same name already exists")
 )
-
-func (v *MemVault) Put(name string, data []byte) error {
-	err := v.Destroy(name)
-	if err != nil {
-		return err
-	}
-
-	vaultData, err := NewMemVaultDataFrom(name, data)
-	if err != nil {
-		return err
-	}
-
-	v.mux.Lock()
-	defer v.mux.Unlock()
-
-	v.data[name] = vaultData
-	return nil
-}
 
 func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
 	v.mux.Lock()
@@ -77,6 +60,7 @@ func (v *MemVault) DestroyAll() error {
 	for name, vaultData := range v.data {
 		err := vaultData.Destroy()
 		if err != nil {
+			log.Printf("failed to destroy vault data with name %s: %v", name, err)
 			isError = true
 			continue
 		}
