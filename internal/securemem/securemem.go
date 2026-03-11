@@ -15,14 +15,14 @@ func readwrite(data []byte) error {
 }
 
 func unalloc(data []byte) error {
-	zero(data)
+	Zero(data)
 
 	unlockErr := unix.Munlock(data)
 	unmapErr := unix.Munmap(data)
 	return errors.Join(unlockErr, unmapErr)
 }
 
-func zero(data []byte) {
+func Zero(data []byte) {
 	for i := range data {
 		data[i] = 0
 	}
