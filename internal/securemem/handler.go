@@ -71,7 +71,13 @@ func Run(ctx context.Context, handler Handler) (*HandlerResponse, error) {
 		return nil, err
 	}
 
-	resp := &HandlerResponse{vault: req.PersistentVault()}
+	persistentVault := req.PersistentVault()
+	err = persistentVault.MarkAllReadOnly()
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &HandlerResponse{vault: persistentVault}
 	success = true
 
 	return resp, nil

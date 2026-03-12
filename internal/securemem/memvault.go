@@ -18,8 +18,9 @@ func NewMemVault() *MemVault {
 }
 
 var (
-	ErrDestroyAll             = errors.New("failed to destroy all vault data")
+	ErrDestroyAllFailed       = errors.New("failed to destroy all vault data")
 	ErrVaultDataAlreadyExists = errors.New("vault data with the same name already exists")
+	ErrMarkOnlyFailed         = errors.New("failed to mark all vault data as read-only")
 )
 
 func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
@@ -58,17 +59,17 @@ func (v *MemVault) DestroyAll() error {
 
 	isError := false
 	for name, vaultData := range v.data {
+		delete(v.data, name)
 		err := vaultData.Destroy()
 		if err != nil {
 			log.Printf("failed to destroy vault data with name %s: %v", name, err)
 			isError = true
 			continue
 		}
-		delete(v.data, name)
 	}
 
 	if isError {
-		return ErrDestroyAll
+		return ErrDestroyAllFailed
 	}
 
 	return nil
@@ -88,5 +89,25 @@ func (v *MemVault) Destroy(name string) error {
 	}
 
 	delete(v.data, name)
+	return nil
+}
+
+func (v *MemVault) MarkAllReadOnly() error {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
+	isError := false
+	for name, vaultData := range v.data {
+		err := vaultData.MarkReadOnly()
+		if err != nil {
+			log.Printf("failed to mark vault data with name %s as read-only: %v", name, err)
+			isError = true
+			continue
+		}
+	}
+	if isError {
+		return ErrMarkOnlyFailed
+	}
+
 	return nil
 }

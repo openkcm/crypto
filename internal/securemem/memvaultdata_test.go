@@ -161,6 +161,7 @@ func TestReadonly(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
+		assert.True(t, subj.IsReadOnly())
 	})
 
 	t.Run("should be idempotent", func(t *testing.T) {
@@ -178,11 +179,13 @@ func TestReadonly(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
+		assert.True(t, subj.IsReadOnly())
 
 		// when
 		err = subj.MarkReadOnly()
 
 		// then
 		assert.NoError(t, err)
+		assert.True(t, subj.IsReadOnly())
 	})
 }

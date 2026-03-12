@@ -356,3 +356,35 @@ func TestVaultDestroy(t *testing.T) {
 		})
 	})
 }
+
+func TestVaultMarkReadOnly(t *testing.T) {
+	t.Run("should mark all data in vault as read-only", func(t *testing.T) {
+		// given
+		vault := securemem.NewMemVault()
+		name1 := "test1"
+		name2 := "test2"
+		data1 := []byte("secret1")
+		data2 := []byte("secret2")
+
+		b, err := vault.Reserve(name1, len(data1))
+		assert.NoError(t, err)
+		copy(b, data1)
+
+		b, err = vault.Reserve(name2, len(data2))
+		assert.NoError(t, err)
+		copy(b, data2)
+
+		// when
+		err = vault.MarkAllReadOnly()
+		assert.NoError(t, err)
+
+		// then
+		actBytes, ok := vault.Get(name1)
+		assert.True(t, ok)
+		assert.Equal(t, data1, actBytes)
+
+		actBytes, ok = vault.Get(name2)
+		assert.True(t, ok)
+		assert.Equal(t, data2, actBytes)
+	})
+}

@@ -94,3 +94,7 @@ func (m *MemVaultData) MarkReadOnly() error {
 func (m *MemVaultData) Name() string {
 	return m.name
 }
+
+func (m *MemVaultData) IsReadOnly() bool {
+	return m.isReadOnly
+}
