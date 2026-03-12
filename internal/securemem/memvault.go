@@ -2,7 +2,7 @@ package securemem
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"sync"
 )
 
@@ -59,13 +59,13 @@ func (v *MemVault) DestroyAll() error {
 
 	isError := false
 	for name, vaultData := range v.data {
-		delete(v.data, name)
 		err := vaultData.Destroy()
 		if err != nil {
-			log.Printf("failed to destroy vault data with name %s: %v", name, err)
+			slog.Error("failed to destroy vault data for", "name", name, "error", err)
 			isError = true
 			continue
 		}
+		delete(v.data, name)
 	}
 
 	if isError {
@@ -100,7 +100,7 @@ func (v *MemVault) MarkAllReadOnly() error {
 	for name, vaultData := range v.data {
 		err := vaultData.MarkReadOnly()
 		if err != nil {
-			log.Printf("failed to mark vault data with name %s as read-only: %v", name, err)
+			slog.Error("failed to mark vault data as readonly for", "name", name, "error", err)
 			isError = true
 			continue
 		}

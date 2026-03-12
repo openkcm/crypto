@@ -2,7 +2,7 @@ package securemem
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"runtime/secret"
 )
 
@@ -47,14 +47,14 @@ func Run(ctx context.Context, handler Handler) (*HandlerResponse, error) {
 	defer func() {
 		err := req.TmpVault().DestroyAll()
 		if err != nil {
-			log.Printf("failed to destroy temp vault: %v", err)
+			slog.Error("failed to destroy temp vault", "error", err)
 		}
 		if success {
 			return
 		}
 		err = req.PersistentVault().DestroyAll()
 		if err != nil {
-			log.Printf("failed to destroy persistent vault after handler error: %v", err)
+			slog.Error("failed to destroy persistent vault after handler", "error", err)
 		}
 	}()
 

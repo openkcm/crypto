@@ -2,6 +2,7 @@ package securemem
 
 import (
 	"errors"
+	"log/slog"
 	"sync"
 )
 
@@ -67,7 +68,7 @@ func (m *MemVaultData) Destroy() error {
 	if m.isReadOnly {
 		err := readwrite(m.data)
 		if err != nil {
-			return err
+			slog.Error("failed to change vault data to read-write before unallocating for", "name", m.name, "error", err)
 		}
 		m.isReadOnly = false
 	}
@@ -96,5 +97,7 @@ func (m *MemVaultData) Name() string {
 }
 
 func (m *MemVaultData) IsReadOnly() bool {
+	m.mux.RLock()
+	defer m.mux.RUnlock()
 	return m.isReadOnly
 }
