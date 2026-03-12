@@ -17,11 +17,7 @@ func NewMemVault() *MemVault {
 	}
 }
 
-var (
-	ErrDestroyAllFailed       = errors.New("failed to destroy all vault data")
-	ErrVaultDataAlreadyExists = errors.New("vault data with the same name already exists")
-	ErrMarkOnlyFailed         = errors.New("failed to mark all vault data as read-only")
-)
+var ErrVaultDataAlreadyExists = errors.New("vault data with the same name already exists")
 
 func (v *MemVault) Reserve(name string, size int) ([]byte, error) {
 	v.mux.Lock()
@@ -57,22 +53,18 @@ func (v *MemVault) DestroyAll() error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
 
-	isError := false
+	errs := make([]error, 0, len(v.data))
 	for name, vaultData := range v.data {
 		err := vaultData.Destroy()
 		if err != nil {
 			slog.Error("failed to destroy vault data for", "name", name, "error", err)
-			isError = true
+			errs = append(errs, err)
 			continue
 		}
 		delete(v.data, name)
 	}
 
-	if isError {
-		return ErrDestroyAllFailed
-	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 func (v *MemVault) Destroy(name string) error {
@@ -83,12 +75,14 @@ func (v *MemVault) Destroy(name string) error {
 	if !ok {
 		return nil
 	}
+
 	err := vaultData.Destroy()
 	if err != nil {
 		return err
 	}
 
 	delete(v.data, name)
+
 	return nil
 }
 
@@ -96,18 +90,15 @@ func (v *MemVault) MarkAllReadOnly() error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
 
-	isError := false
+	errs := make([]error, 0, len(v.data))
 	for name, vaultData := range v.data {
 		err := vaultData.MarkReadOnly()
 		if err != nil {
 			slog.Error("failed to mark vault data as readonly for", "name", name, "error", err)
-			isError = true
+			errs = append(errs, err)
 			continue
 		}
 	}
-	if isError {
-		return ErrMarkOnlyFailed
-	}
 
-	return nil
+	return errors.Join(errs...)
 }
