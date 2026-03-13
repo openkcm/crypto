@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/aes"
 	"fmt"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/openkcm/krypton/internal/securemem"
@@ -31,6 +31,11 @@ func main() {
 		}
 		copy(tmpSecret, b)
 
+		_, err = aes.NewCipher(b)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to create AES cipher: %v", err))
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -40,15 +45,19 @@ func main() {
 	fmt.Println("Checking for secrets in MemVault...")
 	_, ok := resp.MemVault().Get("secret")
 	if !ok {
-		fmt.Println("❌ Secret not found in MemVault")
+		fmt.Println("❌ SECRET NOT FOUND IN MEMVAULT")
 	} else {
-		fmt.Println("✅ Secret found in MemVault")
+		fmt.Println("✅ SECRET FOUND IN MEMVAULT")
+	}
+
+	exposedSecret := "EXPOSED_SECRET123456789012345678"
+	_, err = aes.NewCipher([]byte(exposedSecret))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create AES cipher with exposed secret: %v", err))
 	}
 
 	isCreated := false
 	for {
-		runtime.GC()
-
 		if !isCreated {
 			_, err := os.Create("start")
 			if err != nil {

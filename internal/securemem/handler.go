@@ -3,6 +3,7 @@ package securemem
 import (
 	"context"
 	"log/slog"
+	"runtime"
 	"runtime/secret"
 )
 
@@ -55,6 +56,13 @@ func Run(ctx context.Context, handler Handler) (*HandlerResponse, error) {
 				slog.Error("failed to destroy persistent vault after handler", "error", err)
 			}
 		}
+
+		// calling GC here to ensure that any vault data that is no longer referenced is
+		// collected and finalized before we mark the persistent vault as read-only.
+		// This is important because if there are any vault data that are still referenced,
+		// they may not be finalized and thus not properly cleaned up, which could lead to
+		// memory leaks or security issues.
+		runtime.GC()
 	}()
 
 	var err error

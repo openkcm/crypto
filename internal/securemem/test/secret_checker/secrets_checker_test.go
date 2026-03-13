@@ -83,12 +83,24 @@ func TestSecretChecker(t *testing.T) {
 
 	defer logs.Close()
 
+	isPersistentVaultGetFound := false
+	isExposedSecretFound := false
+
 	scanner := bufio.NewScanner(logs)
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), "ALERT DANGER FOUND") {
-			assert.Fail(t, scanner.Text())
+		assert.NotContains(t, scanner.Text(), "PANIC RECOVERED")
+		assert.NotContains(t, scanner.Text(), "ALERT UNEXPOSED SECRET FOUND: MYSECRETKEY123458901234567890123")
+
+		if !isPersistentVaultGetFound {
+			isPersistentVaultGetFound = strings.Contains(scanner.Text(), "SECRET FOUND IN MEMVAULT")
+		}
+		if !isExposedSecretFound {
+			isExposedSecretFound = strings.Contains(scanner.Text(), "EXPOSED SECRET FOUND: EXPOSED_SECRET123456789012345678")
 		}
 	}
+
+	assert.True(t, isPersistentVaultGetFound, "persistent vault secret not found in logs")
+	assert.True(t, isExposedSecretFound, "exposed secret not found in logs")
 
 	// Step 5: Check exit code
 	_, err = container.State(ctx)
