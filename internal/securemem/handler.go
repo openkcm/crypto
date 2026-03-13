@@ -42,19 +42,18 @@ func Run(ctx context.Context, handler Handler) (*HandlerResponse, error) {
 	}
 
 	req := newHandlerRequest()
+	var resp *HandlerResponse
 
-	success := false
 	defer func() {
 		err := req.TmpVault().DestroyAll()
 		if err != nil {
 			slog.Error("failed to destroy temp vault", "error", err)
 		}
-		if success {
-			return
-		}
-		err = req.PersistentVault().DestroyAll()
-		if err != nil {
-			slog.Error("failed to destroy persistent vault after handler", "error", err)
+		if resp == nil {
+			err = req.PersistentVault().DestroyAll()
+			if err != nil {
+				slog.Error("failed to destroy persistent vault after handler", "error", err)
+			}
 		}
 	}()
 
@@ -77,8 +76,7 @@ func Run(ctx context.Context, handler Handler) (*HandlerResponse, error) {
 		return nil, err
 	}
 
-	resp := &HandlerResponse{vault: persistentVault}
-	success = true
+	resp = &HandlerResponse{vault: persistentVault}
 
 	return resp, nil
 }
